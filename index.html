@@ -2910,9 +2910,7 @@ async function mostrarAulas() {
   const { nome, texto } = window._planoGerado;
   const achados = document.getElementById('av-texto')?.textContent || texto;
 
-  const prompt = `${BASE_CLINICA}
-
-Você é um instrutor sênior de Pilates clínico. Com base no plano abaixo, crie um programa de aulas detalhado para 3 meses.
+  const prompt = `Você é um instrutor sênior de Pilates clínico. Com base no plano abaixo, crie um programa de aulas detalhado para 3 meses.
 
 PLANO CLÍNICO:
 ${achados}
@@ -3488,9 +3486,7 @@ async function gerarPlanoAulaAv() {
   resultDiv.classList.add('show');
   textoDiv.innerHTML = '<div class="ai-loading"><div class="spinner"></div> Analisando achados e elaborando plano clínico...</div>';
 
-  const prompt = `${BASE_CLINICA}
-
-TAREFA: ELABORAR PLANO DE PILATES PERSONALIZADO
+  const prompt = `TAREFA: ELABORAR PLANO DE PILATES PERSONALIZADO
 
 Você é um instrutor sênior de Pilates clínico. Use o dicionário clínico acima para interpretar os achados e gerar um plano claro, direto e visualmente organizado. NÃO mencione os nomes dos exercícios da aula avaliativa onde os achados foram observados — foque nos padrões e disfunções encontrados.
 
