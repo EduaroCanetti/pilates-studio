@@ -2230,7 +2230,7 @@ Com base nos dados e no dicionário clínico acima, elabore:
 Seja específico, use terminologia de Pilates clínico, e explicite o raciocínio por trás de cada escolha.`;
 
   try {
-    const resp = await fetch('/api/claude', {
+    const resp = await fetch('/.netlify/functions/claude', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -2515,7 +2515,7 @@ PROMPT_LEONARDO:
 Cada prompt deve ter entre 80-150 palavras e ser diretamente copiável.`;
 
   try {
-    const resp = await fetch('/api/claude', {
+    const resp = await fetch('/.netlify/functions/claude', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -2943,7 +2943,7 @@ Responda APENAS com um JSON válido, sem markdown, sem explicação, neste forma
 Cada array deve ter exatamente 4 exercícios. Use nomes reais de exercícios de Pilates com o aparelho indicado (Reformer, Cadillac, Chair, Barrel, Mat). Os exercícios devem ser coerentes com o diagnóstico clínico do aluno.`;
 
   try {
-    const resp = await fetch('/api/claude', {
+    const resp = await fetch('/.netlify/functions/claude', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -3553,7 +3553,7 @@ Liste os movimentos ou padrões a evitar ou adaptar, com justificativa clínica.
 Recomendação com justificativa em 2-3 linhas.`;
 
   try {
-    const resp = await fetch('/api/claude', {
+    const resp = await fetch('/.netlify/functions/claude', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
