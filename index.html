@@ -1,0 +1,3609 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pilates Studio AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --sage: #7a9e87;
+    --sage-light: #e8f0ea;
+    --sage-dark: #3d5c47;
+    --warm: #c8a882;
+    --warm-light: #f5ede0;
+    --cream: #faf8f4;
+    --text: #2a2a2a;
+    --text-muted: #7a7570;
+    --border: #e0dbd4;
+    --white: #ffffff;
+    --radius: 12px;
+    --radius-lg: 20px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* LAYOUT */
+  .app { display: flex; flex-direction: column; min-height: 100vh; }
+
+  header {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    color: var(--sage-dark);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .logo span { color: var(--warm); }
+
+  nav { display: flex; gap: 0.25rem; }
+  nav button {
+    background: none;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  nav button.active, nav button:hover {
+    background: var(--sage-light);
+    color: var(--sage-dark);
+    font-weight: 500;
+  }
+
+  main { flex: 1; padding: 2rem; max-width: 960px; margin: 0 auto; width: 100%; }
+
+  /* PANELS */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.6rem;
+    color: var(--sage-dark);
+    margin-bottom: 0.25rem;
+  }
+  .section-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .card-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    color: var(--sage-dark);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .card-title .icon {
+    width: 28px;
+    height: 28px;
+    background: var(--sage-light);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+  }
+
+  /* FORM ELEMENTS */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+  .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+  .form-group.full { grid-column: 1 / -1; }
+
+  label {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  input, select, textarea {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    padding: 0.6rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--cream);
+    color: var(--text);
+    transition: border-color 0.15s;
+    width: 100%;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--sage);
+    background: var(--white);
+  }
+  textarea { resize: vertical; min-height: 80px; }
+
+  /* SCALE RATING */
+  .scale-group { display: flex; flex-direction: column; gap: 0.5rem; }
+  .scale-label { font-size: 0.78rem; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .scale-options { display: flex; gap: 0.4rem; }
+  .scale-options button {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--cream);
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .scale-options button:hover { border-color: var(--sage); color: var(--sage-dark); }
+  .scale-options button.selected {
+    background: var(--sage);
+    border-color: var(--sage);
+    color: white;
+  }
+  .scale-hint { font-size: 0.72rem; color: var(--text-muted); display: flex; justify-content: space-between; padding: 0 2px; }
+
+  /* CHECKBOX GROUP */
+  .check-group { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 0.3rem 0.75rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-size: 0.85rem;
+    user-select: none;
+  }
+  .check-item input { display: none; }
+  .check-item:hover { border-color: var(--sage); }
+  .check-item.checked {
+    background: var(--sage-light);
+    border-color: var(--sage);
+    color: var(--sage-dark);
+    font-weight: 500;
+  }
+
+  /* BUTTONS */
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.7rem 1.5rem;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .btn-primary {
+    background: var(--sage-dark);
+    color: white;
+  }
+  .btn-primary:hover { background: var(--sage); }
+  .btn-secondary {
+    background: var(--white);
+    color: var(--sage-dark);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { background: var(--sage-light); border-color: var(--sage); }
+  .btn-warm {
+    background: var(--warm);
+    color: white;
+  }
+  .btn-warm:hover { opacity: 0.88; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* AI RESULT AREA */
+  .ai-result {
+    background: linear-gradient(135deg, var(--sage-light) 0%, var(--warm-light) 100%);
+    border: 1px solid var(--sage);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+    display: none;
+  }
+  .ai-result.show { display: block; }
+  .ai-result-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.15rem;
+    color: var(--sage-dark);
+  }
+  .ai-badge {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.7rem;
+    background: var(--sage-dark);
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 20px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+  .ai-content {
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: var(--text);
+    white-space: pre-wrap;
+  }
+  .ai-loading {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--sage-dark);
+    font-size: 0.9rem;
+  }
+  .spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--sage-light);
+    border-top-color: var(--sage-dark);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ALUNOS LIST */
+  .alunos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+  .aluno-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .aluno-card:hover { border-color: var(--sage); transform: translateY(-2px); }
+  .aluno-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--sage-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    font-size: 1rem;
+    color: var(--sage-dark);
+    margin-bottom: 0.75rem;
+  }
+  .aluno-name { font-weight: 500; font-size: 0.95rem; margin-bottom: 0.2rem; }
+  .aluno-meta { font-size: 0.78rem; color: var(--text-muted); }
+  .aluno-tag {
+    display: inline-block;
+    margin-top: 0.5rem;
+    font-size: 0.72rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .tag-trat { background: var(--warm-light); color: #8a5c2e; }
+  .tag-cond { background: var(--sage-light); color: var(--sage-dark); }
+
+  /* FINANCEIRO */
+  .fin-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+  .stat-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    text-align: center;
+  }
+  .stat-value { font-family: 'DM Serif Display', serif; font-size: 1.8rem; color: var(--sage-dark); }
+  .stat-label { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+  .pagamentos-list { display: flex; flex-direction: column; gap: 0.75rem; }
+  .pag-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.9rem 1.25rem;
+  }
+  .pag-info { display: flex; flex-direction: column; gap: 0.2rem; }
+  .pag-name { font-weight: 500; font-size: 0.9rem; }
+  .pag-plan { font-size: 0.78rem; color: var(--text-muted); }
+  .pag-valor { font-weight: 500; font-size: 0.95rem; color: var(--sage-dark); }
+  .pag-status {
+    font-size: 0.72rem;
+    font-weight: 500;
+    padding: 0.25rem 0.65rem;
+    border-radius: 20px;
+  }
+  .status-ok { background: #e6f4ea; color: #2d6a4f; }
+  .status-vence { background: #fff3cd; color: #856404; }
+  .status-atrasado { background: #fdecea; color: #9b2c2c; }
+
+  /* INSTAGRAM */
+  .temas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.25rem; }
+  .tema-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .tema-card:hover, .tema-card.selected {
+    border-color: var(--warm);
+    background: var(--warm-light);
+  }
+  .tema-card.selected { border-width: 2px; }
+  .tema-icon { font-size: 1.4rem; margin-bottom: 0.4rem; }
+  .tema-name { font-size: 0.85rem; font-weight: 500; color: var(--sage-dark); }
+  .tema-desc { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; }
+
+  /* DIVIDER */
+  .divider { height: 1px; background: var(--border); margin: 1.5rem 0; }
+
+  /* STEPS INDICATOR */
+  .steps {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+  .step.active { color: var(--sage-dark); font-weight: 500; }
+  .step-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+  }
+  .step.active .step-num { background: var(--sage-dark); border-color: var(--sage-dark); color: white; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--sage-dark);
+    color: white;
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s;
+    z-index: 999;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* AULA AVALIATIVA */
+  .av-section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: var(--sage-dark);
+    color: white;
+    padding: 0.6rem 1rem;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin: 1.5rem 0 0.75rem;
+  }
+  .av-section-header:first-of-type { margin-top: 0; }
+  .av-section-header .equip {
+    margin-left: auto;
+    font-size: 0.72rem;
+    background: rgba(255,255,255,0.18);
+    padding: 0.15rem 0.55rem;
+    border-radius: 20px;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .ex-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-bottom: 0.85rem;
+    overflow: hidden;
+  }
+  .ex-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 1.25rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.12s;
+  }
+  .ex-header:hover { background: var(--sage-light); }
+  .ex-name {
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: var(--sage-dark);
+  }
+  .ex-equip {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    background: var(--cream);
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+  }
+  .ex-chevron {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    transition: transform 0.2s;
+  }
+  .ex-card.open .ex-chevron { transform: rotate(180deg); }
+  .ex-body {
+    display: none;
+    padding: 0 1.25rem 1.25rem;
+    border-top: 1px solid var(--border);
+  }
+  .ex-card.open .ex-body { display: block; }
+
+  .obs-group {
+    margin-top: 1rem;
+  }
+  .obs-label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  /* Radio pill groups */
+  .pill-group { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.6rem; }
+  .pill-row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
+  .pill-row-label { font-size: 0.82rem; color: var(--text); min-width: 70px; }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.28rem 0.75rem;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--cream);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.12s;
+    user-select: none;
+    color: var(--text);
+  }
+  .pill:hover { border-color: var(--sage); color: var(--sage-dark); }
+  .pill.selected-check {
+    background: var(--sage-light);
+    border-color: var(--sage);
+    color: var(--sage-dark);
+    font-weight: 500;
+  }
+  .pill.selected-radio {
+    background: var(--sage-dark);
+    border-color: var(--sage-dark);
+    color: white;
+    font-weight: 500;
+  }
+  .pill.selected-pain {
+    background: #fdecea;
+    border-color: #e24b4a;
+    color: #9b2c2c;
+    font-weight: 500;
+  }
+
+  .text-obs {
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--cream);
+    color: var(--text);
+    resize: vertical;
+    min-height: 56px;
+    margin-top: 0.5rem;
+  }
+  .text-obs:focus { outline: none; border-color: var(--sage); background: var(--white); }
+
+  .av-progress {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  .av-progress-bar-wrap {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .av-progress-bar {
+    height: 100%;
+    background: var(--sage);
+    border-radius: 3px;
+    transition: width 0.3s;
+    width: 0%;
+  }
+  .av-progress-label { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; }
+
+  /* PROMPT TABS */
+  .prompt-tab {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    padding: 0.3rem 0.85rem;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--cream);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .prompt-tab:hover { border-color: var(--warm); color: var(--sage-dark); }
+  .prompt-tab.active {
+    background: var(--sage-dark);
+    border-color: var(--sage-dark);
+    color: white;
+  }
+  .prompt-box {
+    background: #1e1e2e;
+    color: #cdd6f4;
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+    font-family: 'DM Mono', 'Courier New', monospace;
+    font-size: 0.82rem;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 260px;
+    overflow-y: auto;
+    border: 1px solid #313244;
+  }
+  .prompt-box::-webkit-scrollbar { width: 5px; }
+  .prompt-box::-webkit-scrollbar-thumb { background: #45475a; border-radius: 3px; }
+
+
+  /* AULAS MÊS A MÊS */
+  .mes-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--sage-dark);
+    color: white;
+    padding: 0.9rem 1.25rem;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+  }
+  .mes-badge {
+    background: var(--dourado, #c8a882);
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.2rem 0.65rem;
+    border-radius: 20px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-left: auto;
+  }
+  .mes-body {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  .aula-tabs {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+  .aula-tab {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.35rem 0.9rem;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--cream);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .aula-tab.active {
+    background: var(--sage-dark);
+    border-color: var(--sage-dark);
+    color: white;
+  }
+  .aula-panel { display: none; }
+  .aula-panel.active { display: block; }
+  .fase-aula {
+    margin-bottom: 1rem;
+  }
+  .fase-aula-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.85rem;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .fase-aquecimento { background: #e8f4f0; color: #2d6a4f; }
+  .fase-mmss        { background: #e8eaf6; color: #3949ab; }
+  .fase-mmii        { background: #fff3e0; color: #e65100; }
+  .fase-tronco      { background: #fce4ec; color: #c62828; }
+  .ex-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding-left: 0.5rem;
+  }
+  .ex-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-size: 0.87rem;
+    color: var(--text);
+    line-height: 1.5;
+    padding: 0.35rem 0.5rem;
+    border-radius: 6px;
+    transition: background 0.1s;
+  }
+  .ex-item:hover { background: var(--cream); }
+  .ex-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--sage);
+    margin-top: 0.45rem;
+    flex-shrink: 0;
+  }
+  .freq-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--warm-light);
+    border: 1px solid var(--warm);
+    color: #7a4a1e;
+    font-size: 0.82rem;
+    font-weight: 500;
+    padding: 0.35rem 0.85rem;
+    border-radius: 20px;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 640px) {
+    main { padding: 1rem; }
+    .form-grid, .form-grid-3, .alunos-grid, .fin-stats, .temas-grid { grid-template-columns: 1fr; }
+    .form-group.full { grid-column: 1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- KEY MODAL -->
+<div id="key-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:16px;padding:2rem;max-width:440px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+    <div style="font-family:'DM Serif Display',serif;font-size:1.2rem;color:#3d5c47;margin-bottom:0.5rem;">Configurar chave de API</div>
+    <p style="font-size:0.85rem;color:#7a7570;margin-bottom:1.25rem;line-height:1.6;">Para usar a geração de planos, insira sua chave da Anthropic. Ela fica salva apenas neste navegador.</p>
+    <input type="password" id="key-input" placeholder="sk-ant-api03-..." style="width:100%;padding:0.65rem 0.9rem;border:1px solid #e0dbd4;border-radius:8px;font-size:0.9rem;margin-bottom:1rem;box-sizing:border-box;">
+    <div style="font-size:0.75rem;color:#7a7570;margin-bottom:1.25rem;">
+      Obtenha sua chave em <strong>console.anthropic.com</strong> → API Keys
+    </div>
+    <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
+      <button onclick="fecharKeyModal()" style="padding:0.6rem 1.2rem;border:1px solid #e0dbd4;border-radius:8px;background:white;cursor:pointer;font-size:0.9rem;">Cancelar</button>
+      <button onclick="salvarKey()" style="padding:0.6rem 1.2rem;background:#3d5c47;color:white;border:none;border-radius:8px;cursor:pointer;font-size:0.9rem;font-weight:500;">Salvar e continuar</button>
+    </div>
+  </div>
+</div>
+
+<div id="file-warning" style="display:none;background:#c0392b;color:white;text-align:center;padding:0.6rem 1rem;font-size:0.85rem;font-weight:500;">
+  ⚠ Para usar a geração de planos, abra o app com o arquivo <strong>INICIAR_APP.py</strong> — não diretamente pelo navegador.
+  <a href="#" onclick="document.getElementById('file-warning').style.display='none'" style="color:white;margin-left:1rem;opacity:0.8;">✕ fechar</a>
+</div>
+<div class="app">
+  <header>
+    <div class="logo">Studio<span>Pilates</span> <small style="font-family:'DM Sans';font-size:0.65rem;background:var(--sage-light);color:var(--sage-dark);padding:0.15rem 0.5rem;border-radius:20px;font-weight:500;margin-left:4px;">AI</small></div>
+    <nav>
+      <button class="active" onclick="showPanel('aula-avaliativa', this)">✦ Aula Avaliativa</button>
+      <button onclick="showPanel('alunos', this)">Alunos</button>
+      <button onclick="showPanel('financeiro', this)">Financeiro</button>
+      <button onclick="showPanel('instagram', this)">Instagram</button>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- AVALIAÇÃO -->
+    <div id="avaliacao" class="panel">
+      <p class="section-title">Nova Avaliação</p>
+      <p class="section-subtitle">Preencha os dados da aula experimental para gerar o plano personalizado com IA</p>
+
+      <div class="steps">
+        <div class="step active"><div class="step-num">1</div> Dados pessoais</div>
+        <div style="color:var(--border);align-self:center">›</div>
+        <div class="step active"><div class="step-num">2</div> Avaliação postural</div>
+        <div style="color:var(--border);align-self:center">›</div>
+        <div class="step active"><div class="step-num">3</div> Mobilidade</div>
+        <div style="color:var(--border);align-self:center">›</div>
+        <div class="step active"><div class="step-num">4</div> Queixas e dores</div>
+      </div>
+
+      <!-- DADOS PESSOAIS -->
+      <div class="card">
+        <div class="card-title"><div class="icon">👤</div> Dados do aluno</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nome completo</label>
+            <input type="text" id="nome" placeholder="Maria da Silva">
+          </div>
+          <div class="form-group">
+            <label>Idade</label>
+            <input type="number" id="idade" placeholder="35">
+          </div>
+          <div class="form-group">
+            <label>Objetivo principal</label>
+            <select id="objetivo">
+              <option value="">Selecionar...</option>
+              <option value="condicionamento">Condicionamento físico</option>
+              <option value="emagrecimento">Emagrecimento</option>
+              <option value="reabilitacao">Reabilitação / tratamento</option>
+              <option value="pos-parto">Pós-parto</option>
+              <option value="qualidade">Qualidade de vida</option>
+              <option value="esportivo">Preparo esportivo</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Histórico relevante</label>
+            <input type="text" id="historico" placeholder="Cirurgias, lesões, patologias...">
+          </div>
+        </div>
+      </div>
+
+      <!-- AVALIAÇÃO POSTURAL -->
+      <div class="card">
+        <div class="card-title"><div class="icon">🦴</div> Avaliação postural</div>
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+          <div class="form-group">
+            <label>Curvaturas da coluna</label>
+            <div class="check-group" id="curvaturas">
+              <label class="check-item"><input type="checkbox" value="hipercifose">Hipercifose torácica</label>
+              <label class="check-item"><input type="checkbox" value="hiperlordose">Hiperlordose lombar</label>
+              <label class="check-item"><input type="checkbox" value="retificacao-cerv">Retificação cervical</label>
+              <label class="check-item"><input type="checkbox" value="retificacao-lomb">Retificação lombar</label>
+              <label class="check-item"><input type="checkbox" value="escoliose">Escoliose</label>
+              <label class="check-item"><input type="checkbox" value="normal">Dentro da normalidade</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Ombros</label>
+            <div class="check-group" id="ombros">
+              <label class="check-item"><input type="checkbox" value="rot-interna">Rotação interna / projeção anterior</label>
+              <label class="check-item"><input type="checkbox" value="retracao">Retração escapular</label>
+              <label class="check-item"><input type="checkbox" value="elevacao">Elevação</label>
+              <label class="check-item"><input type="checkbox" value="assimetria">Assimetria</label>
+              <label class="check-item"><input type="checkbox" value="normal">Alinhamento normal</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Cabeça e pescoço</label>
+            <div class="check-group" id="cabeca">
+              <label class="check-item"><input type="checkbox" value="projecao">Projeção anterior da cabeça</label>
+              <label class="check-item"><input type="checkbox" value="hiperext-cerv">Hiperextensão cervical</label>
+              <label class="check-item"><input type="checkbox" value="retif-cerv">Retificação cervical</label>
+              <label class="check-item"><input type="checkbox" value="normal">Alinhamento normal</label>
+            </div>
+          </div>
+
+          <div class="form-grid-3">
+            <div class="form-group">
+              <label>Pelve</label>
+              <select id="pelve">
+                <option value="">Selecionar...</option>
+                <option value="anteroversao">Anteroversão</option>
+                <option value="retroversao">Retroversão</option>
+                <option value="normal">Neutro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Joelhos</label>
+              <select id="joelhos">
+                <option value="">Selecionar...</option>
+                <option value="valgo">Valgo (X)</option>
+                <option value="varo">Varo (O)</option>
+                <option value="recurvatum">Recurvatum</option>
+                <option value="normal">Normal</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Pés</label>
+              <select id="pes">
+                <option value="">Selecionar...</option>
+                <option value="plano-pronacao">Plano / pronação</option>
+                <option value="cavo-supinacao">Cavo / supinação</option>
+                <option value="normal">Normal</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Coxa — rotação do quadril</label>
+            <div class="check-group" id="coxa">
+              <label class="check-item"><input type="checkbox" value="rot-interna">Rotação interna</label>
+              <label class="check-item"><input type="checkbox" value="rot-externa">Rotação externa</label>
+              <label class="check-item"><input type="checkbox" value="normal">Normal</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MOBILIDADE -->
+      <div class="card">
+        <div class="card-title"><div class="icon">🌀</div> Níveis de mobilidade</div>
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+          <div class="scale-group">
+            <div class="scale-label">Coluna cervical</div>
+            <div class="scale-options" id="mob-cerv"></div>
+            <div class="scale-hint"><span>Muito limitada</span><span>Excelente</span></div>
+          </div>
+
+          <div class="scale-group">
+            <div class="scale-label">Coluna torácica</div>
+            <div class="scale-options" id="mob-tor"></div>
+            <div class="scale-hint"><span>Muito limitada</span><span>Excelente</span></div>
+          </div>
+
+          <div class="scale-group">
+            <div class="scale-label">Coluna lombar</div>
+            <div class="scale-options" id="mob-lomb"></div>
+            <div class="scale-hint"><span>Muito limitada</span><span>Excelente</span></div>
+          </div>
+
+          <div class="scale-group">
+            <div class="scale-label">Cintura escapular</div>
+            <div class="scale-options" id="mob-esc"></div>
+            <div class="scale-hint"><span>Muito limitada</span><span>Excelente</span></div>
+          </div>
+
+          <div class="scale-group">
+            <div class="scale-label">Cintura pélvica / quadril</div>
+            <div class="scale-options" id="mob-pelv"></div>
+            <div class="scale-hint"><span>Muito limitada</span><span>Excelente</span></div>
+          </div>
+
+          <div class="scale-group">
+            <div class="scale-label">Dissociação pélvica-escapular (plano transversal)</div>
+            <div class="scale-options" id="mob-diss"></div>
+            <div class="scale-hint"><span>Ausente</span><span>Excelente</span></div>
+          </div>
+
+          <div class="scale-group">
+            <div class="scale-label">Força muscular global</div>
+            <div class="scale-options" id="forca"></div>
+            <div class="scale-hint"><span>Muito fraca</span><span>Excelente</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUEIXAS E DORES -->
+      <div class="card">
+        <div class="card-title"><div class="icon">⚕️</div> Queixas e dores</div>
+        <div style="display:flex;flex-direction:column;gap:1rem;">
+
+          <div class="form-group">
+            <label>Regiões com dor durante os exercícios</label>
+            <div class="check-group" id="regioes-dor">
+              <label class="check-item"><input type="checkbox" value="sem-dor">Sem dor</label>
+              <label class="check-item"><input type="checkbox" value="cerv">Cervical</label>
+              <label class="check-item"><input type="checkbox" value="tor">Torácica</label>
+              <label class="check-item"><input type="checkbox" value="lomb">Lombar</label>
+              <label class="check-item"><input type="checkbox" value="ombro">Ombro</label>
+              <label class="check-item"><input type="checkbox" value="quadril">Quadril</label>
+              <label class="check-item"><input type="checkbox" value="joelho">Joelho</label>
+              <label class="check-item"><input type="checkbox" value="tornozelo">Tornozelo/Pé</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Descrição das dores (localização, irradiação, características)</label>
+            <textarea id="desc-dor" placeholder="Ex: Dor lombar com irradiação para face posterior da coxa até o joelho, sensação de choque e parestesia no trajeto..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Observações gerais do avaliador</label>
+            <textarea id="obs" placeholder="Impressões, comportamento, compensações observadas, motivação..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:1rem;margin-top:0.5rem;">
+        <button class="btn btn-secondary" onclick="limparForm()">Limpar</button>
+        <button class="btn btn-primary" onclick="gerarPlano()">✦ Gerar plano de aulas</button>
+      </div>
+
+      <!-- RESULTADO IA -->
+      <div class="ai-result" id="resultado-ia">
+        <div class="ai-result-header">
+          Plano de aulas personalizado
+        </div>
+        <div class="ai-content" id="ia-texto"></div>
+      </div>
+    </div>
+
+    <!-- ALUNOS -->
+    <div id="alunos" class="panel">
+      <p class="section-title">Alunos</p>
+      <p class="section-subtitle">Alunos cadastrados no estúdio</p>
+
+      <div style="display:flex;justify-content:flex-end;margin-bottom:1rem;">
+        <button class="btn btn-primary" onclick="showPanel('aula-avaliativa', document.querySelectorAll('nav button')[0])">+ Nova avaliação</button>
+      </div>
+
+      <div class="alunos-grid" id="alunos-grid"></div>
+
+      <!-- MODAL ALUNO -->
+      <div id="modal-aluno" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:200;align-items:center;justify-content:center;">
+        <div style="background:var(--white);border-radius:var(--radius-lg);padding:2rem;max-width:520px;width:90%;max-height:85vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.18);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+            <div style="font-family:'DM Serif Display',serif;font-size:1.2rem;color:var(--sage-dark);" id="modal-titulo">Dados do aluno</div>
+            <button onclick="fecharModal()" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--text-muted);">✕</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:1rem;">
+            <div class="form-group">
+              <label>Nome completo</label>
+              <input type="text" id="m-nome" placeholder="Nome completo">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+              <div class="form-group">
+                <label>Idade</label>
+                <input type="number" id="m-idade" placeholder="Ex: 38">
+              </div>
+              <div class="form-group">
+                <label>Data de aniversário</label>
+                <input type="date" id="m-aniversario">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Objetivo / motivo das aulas</label>
+              <select id="m-objetivo">
+                <option value="">Selecionar...</option>
+                <option value="condicionamento">Condicionamento físico</option>
+                <option value="reabilitacao">Reabilitação / tratamento</option>
+                <option value="pos-parto">Pós-parto</option>
+                <option value="qualidade">Qualidade de vida</option>
+                <option value="esportivo">Preparo esportivo</option>
+                <option value="emagrecimento">Emagrecimento</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Resumo clínico (o que trata ou treina)</label>
+              <textarea id="m-resumo" placeholder="Ex: Tratamento de dor lombar crônica com irradiação para MMII..."></textarea>
+            </div>
+            <div class="form-group">
+              <label>Doenças crônicas</label>
+              <input type="text" id="m-doencas" placeholder="Ex: Hipertensão, diabetes tipo 2, hipotireoidismo...">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+              <div class="form-group">
+                <label>Telefone do aluno</label>
+                <input type="tel" id="m-tel" placeholder="(11) 99999-9999">
+              </div>
+              <div class="form-group">
+                <label>Contato de emergência</label>
+                <input type="tel" id="m-emerg" placeholder="(11) 99999-9999">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Nome do contato de emergência</label>
+              <input type="text" id="m-emerg-nome" placeholder="Nome e grau de parentesco">
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:0.75rem;margin-top:1.5rem;">
+            <button class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
+            <button class="btn btn-primary" onclick="salvarModal()">Salvar aluno</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FINANCEIRO -->
+    <div id="financeiro" class="panel">
+      <p class="section-title">Financeiro</p>
+      <p class="section-subtitle">Controle de mensalidades e planos</p>
+
+      <div class="fin-stats">
+        <div class="stat-card">
+          <div class="stat-value">R$ 4.850</div>
+          <div class="stat-label">Faturamento do mês</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="color:var(--warm);">R$ 680</div>
+          <div class="stat-label">A receber</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">12</div>
+          <div class="stat-label">Alunos ativos</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><div class="icon">💳</div> Mensalidades — Maio 2025</div>
+        <div class="pagamentos-list" id="pagamentos-list"></div>
+      </div>
+
+      <div class="card" style="margin-top:1.25rem;">
+        <div class="card-title"><div class="icon">📱</div> Configuração WhatsApp</div>
+        <div style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1rem;">Configure para enviar lembretes automáticos de vencimento e cobranças cordiais.</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nome do estúdio</label>
+            <input type="text" id="wa-studio" placeholder="Studio Pilates">
+          </div>
+          <div class="form-group">
+            <label>Chave PIX</label>
+            <input type="text" id="wa-pix" placeholder="contato@seuestudio.com.br">
+          </div>
+        </div>
+        <div style="margin-top:0.75rem;font-size:0.8rem;color:var(--text-muted);">
+          💡 Os botões de WhatsApp abrirão o WhatsApp Web com a mensagem pré-preenchida para o número do aluno.
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:1.25rem;">
+        <div class="card-title"><div class="icon">➕</div> Registrar pagamento</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Aluno</label>
+            <select id="pag-aluno">
+              <option value="">Selecionar aluno...</option>
+              <option>Maria Oliveira</option>
+              <option>João Santos</option>
+              <option>Ana Pereira</option>
+              <option>Carlos Lima</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Plano</label>
+            <select id="pag-plano">
+              <option value="">Selecionar plano...</option>
+              <option value="2x">2x por semana — R$ 380</option>
+              <option value="3x">3x por semana — R$ 520</option>
+              <option value="5x">5x por semana — R$ 720</option>
+              <option value="trat">Plano tratamento — R$ 600</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Vencimento</label>
+            <input type="date" id="pag-venc">
+          </div>
+          <div class="form-group">
+            <label>Valor</label>
+            <input type="text" id="pag-valor" placeholder="R$ 0,00">
+          </div>
+          <div class="form-group">
+            <label>WhatsApp do aluno</label>
+            <input type="tel" id="pag-tel" placeholder="(11) 99999-9999">
+          </div>
+        </div>
+        <div style="margin-top:1rem;display:flex;justify-content:flex-end;">
+          <button class="btn btn-primary" onclick="registrarPag()">Registrar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- INSTAGRAM -->
+    <div id="instagram" class="panel">
+      <p class="section-title">Gerador de Conteúdo</p>
+      <p class="section-subtitle">Roteiro para legenda + prompt pronto para gerar imagens em qualquer IA</p>
+
+      <div class="card">
+        <div class="card-title"><div class="icon">✨</div> Tema do post</div>
+        <div class="temas-grid">
+          <div class="tema-card selected" onclick="selecionarTema(this, 'dor-coluna')">
+            <div class="tema-icon">🦴</div>
+            <div class="tema-name">Dor na coluna</div>
+            <div class="tema-desc">Como o Pilates alivia dores lombares</div>
+          </div>
+          <div class="tema-card" onclick="selecionarTema(this, 'postura')">
+            <div class="tema-icon">🧍</div>
+            <div class="tema-name">Postura</div>
+            <div class="tema-desc">Correção postural e qualidade de vida</div>
+          </div>
+          <div class="tema-card" onclick="selecionarTema(this, 'iniciantes')">
+            <div class="tema-icon">🌱</div>
+            <div class="tema-name">Para iniciantes</div>
+            <div class="tema-desc">Desmistificar o Pilates</div>
+          </div>
+          <div class="tema-card" onclick="selecionarTema(this, 'reabilitacao')">
+            <div class="tema-icon">❤️‍🩹</div>
+            <div class="tema-name">Reabilitação</div>
+            <div class="tema-desc">Pilates clínico e tratamento</div>
+          </div>
+          <div class="tema-card" onclick="selecionarTema(this, 'pos-parto')">
+            <div class="tema-icon">🤱</div>
+            <div class="tema-name">Pós-parto</div>
+            <div class="tema-desc">Retorno ao exercício com segurança</div>
+          </div>
+          <div class="tema-card" onclick="selecionarTema(this, 'depoimento')">
+            <div class="tema-icon">💬</div>
+            <div class="tema-name">Depoimento fictício</div>
+            <div class="tema-desc">Exemplo de transformação de aluno</div>
+          </div>
+          <div class="tema-card" id="tema-outros-card" onclick="selecionarTema(this, 'outros')">
+            <div class="tema-icon">✏️</div>
+            <div class="tema-name">Outro tema</div>
+            <div class="tema-desc">Escreva o tema livremente</div>
+          </div>
+        </div>
+        <div id="outros-tema-wrap" style="display:none;margin-top:0.75rem;">
+          <textarea id="outros-tema-texto" rows="2" style="width:100%;font-family:'DM Sans',sans-serif;font-size:0.88rem;padding:0.65rem 0.9rem;border:1px solid var(--border);border-radius:10px;background:var(--cream);resize:none;" placeholder="Descreva o tema do post. Ex: benefícios do Pilates para corredores, dicas de respiração, alongamento matinal..."></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><div class="icon">🎨</div> Personalização</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Tom do post</label>
+            <select id="tom-post">
+              <option value="educativo">Educativo e informativo</option>
+              <option value="emocional">Emocional e inspirador</option>
+              <option value="descontraido">Descontraído e próximo</option>
+              <option value="profissional">Profissional e técnico</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Nome do estúdio</label>
+            <input type="text" id="nome-studio" placeholder="Studio Pilates...">
+          </div>
+          <div class="form-group">
+            <label>Endereço do estúdio (opcional)</label>
+            <input type="text" id="endereco-studio" placeholder="Rua das Flores, 123 – Moema, SP">
+          </div>
+          <div class="form-group">
+            <label>Informações extras</label>
+            <input type="text" id="extra-insta" placeholder="Promoção, evento especial...">
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="card-title" style="margin-top:0.25rem;"><div class="icon">🖼️</div> Imagem — formato e estilo</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Formato</label>
+            <select id="img-formato">
+              <option value="4:5">Post estático (4:5 — 1080×1350px)</option>
+              <option value="carrossel">Carrossel (4:5 — até 5 slides)</option>
+              <option value="quadrado">Quadrado (1:1 — 1080×1080px)</option>
+              <option value="stories">Stories (9:16 — 1080×1920px)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Estilo visual</label>
+            <select id="img-estilo">
+              <option value="fotografico">Fotográfico realista</option>
+              <option value="ilustracao">Ilustração digital</option>
+              <option value="aquarela">Aquarela / watercolor</option>
+              <option value="minimalista">Minimalista e clean</option>
+              <option value="manga">Mangá / anime</option>
+              <option value="3d">Render 3D</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Cor primária da marca</label>
+            <div style="display:flex;gap:0.5rem;align-items:center;">
+              <input type="color" id="cor-primaria" value="#3d5c47" style="width:42px;height:36px;padding:2px;border-radius:8px;border:1px solid var(--border);cursor:pointer;">
+              <input type="text" id="cor-primaria-hex" value="#3d5c47" placeholder="#3d5c47" style="flex:1;" oninput="document.getElementById('cor-primaria').value=this.value">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Cor secundária da marca</label>
+            <div style="display:flex;gap:0.5rem;align-items:center;">
+              <input type="color" id="cor-secundaria" value="#c8a882" style="width:42px;height:36px;padding:2px;border-radius:8px;border:1px solid var(--border);cursor:pointer;">
+              <input type="text" id="cor-secundaria-hex" value="#c8a882" placeholder="#c8a882" style="flex:1;" oninput="document.getElementById('cor-secundaria').value=this.value">
+            </div>
+          </div>
+          <div class="form-group full">
+            <label>Elementos visuais adicionais (opcional)</label>
+            <input type="text" id="img-extras" placeholder="Ex: mulher 40 anos praticando pilates, fundo claro, luz natural, aparelho reformer...">
+          </div>
+        </div>
+
+        <div style="margin-top:1.25rem;display:flex;justify-content:flex-end;">
+          <button class="btn btn-warm" onclick="gerarPost()">✦ Criar conteúdo</button>
+        </div>
+      </div>
+
+      <!-- RESULTADO -->
+      <div class="ai-result" id="resultado-insta" style="display:none;">
+
+        <!-- LEGENDA -->
+        <div style="margin-bottom:1.5rem;">
+          <div class="ai-result-header" style="margin-bottom:0.75rem;">
+            📝 Legenda e roteiro 
+          </div>
+          <div class="ai-content" id="insta-texto" style="background:var(--white);border-radius:10px;padding:1rem;border:1px solid var(--border);"></div>
+          <div style="margin-top:0.75rem;display:flex;gap:0.75rem;">
+            <button class="btn btn-secondary" onclick="copiarTexto('insta-texto')">📋 Copiar legenda</button>
+            <button class="btn btn-secondary" onclick="gerarPost()">↻ Gerar outro</button>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- PROMPT DE IMAGEM -->
+        <div>
+          <div class="ai-result-header" style="margin-bottom:0.5rem;">
+            🎨 Prompt para geração de imagem 
+          </div>
+          <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:0.75rem;">
+            Cole este prompt em qualquer gerador: <strong>DALL-E · Midjourney · Adobe Firefly · Leonardo AI · Stable Diffusion</strong>
+          </div>
+
+          <!-- Tabs de ferramentas -->
+          <div style="display:flex;gap:0.4rem;margin-bottom:0.75rem;flex-wrap:wrap;" id="prompt-tabs">
+            <button class="prompt-tab active" onclick="mostrarPrompt('universal')">Universal</button>
+            <button class="prompt-tab" onclick="mostrarPrompt('midjourney')">Midjourney</button>
+            <button class="prompt-tab" onclick="mostrarPrompt('firefly')">Adobe Firefly</button>
+            <button class="prompt-tab" onclick="mostrarPrompt('leonardo')">Leonardo AI</button>
+          </div>
+
+          <div id="prompt-universal" class="prompt-box"></div>
+          <div id="prompt-midjourney" class="prompt-box" style="display:none;"></div>
+          <div id="prompt-firefly" class="prompt-box" style="display:none;"></div>
+          <div id="prompt-leonardo" class="prompt-box" style="display:none;"></div>
+
+          <div style="margin-top:0.75rem;display:flex;gap:0.75rem;flex-wrap:wrap;" id="copy-prompt-btns">
+            <button class="btn btn-secondary" onclick="copiarPromptAtivo()">📋 Copiar prompt</button>
+            <button class="btn btn-secondary" style="background:var(--warm-light);color:#7a4a1e;border-color:var(--warm);" onclick="abrirDallE()">↗ Abrir DALL-E</button>
+            <button class="btn btn-secondary" style="background:var(--warm-light);color:#7a4a1e;border-color:var(--warm);" onclick="abrirFirefly()">↗ Abrir Firefly</button>
+            <button class="btn btn-secondary" style="background:var(--warm-light);color:#7a4a1e;border-color:var(--warm);" onclick="abrirLeonardo()">↗ Abrir Leonardo</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AULA AVALIATIVA -->
+    <div id="aula-avaliativa" class="panel active">
+      <p class="section-title">Aula Avaliativa</p>
+      <p class="section-subtitle">Protocolo de observação exercício a exercício — assinale os achados em tempo real</p>
+
+      <div class="av-progress">
+        <span class="av-progress-label">Progresso</span>
+        <div class="av-progress-bar-wrap"><div class="av-progress-bar" id="av-prog-bar"></div></div>
+        <span class="av-progress-label" id="av-prog-label">0 / 12 exercícios</span>
+      </div>
+
+      <!-- 1. MOBILIDADE E CONTROLE DE COLUNA -->
+      <div class="av-section-header">1 · Mobilidade e controle de coluna</div>
+
+      <!-- Spine Stretch -->
+      <div class="ex-card" id="ex-spine-stretch">
+        <div class="ex-header" onclick="toggleEx('ex-spine-stretch')">
+          <div style="display:flex;flex-direction:column;gap:0.15rem;">
+            <span class="ex-name">Spine Stretch</span>
+            <span style="font-size:0.75rem;color:var(--text-muted)">Mobilidade global da coluna</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;">
+            <span class="ex-equip">Cadillac</span>
+            <span class="ex-chevron">▼</span>
+          </div>
+        </div>
+        <div class="ex-body">
+          <div class="obs-group">
+            <span class="obs-label">Hipomobilidade — segmento</span>
+            <div class="pill-group">
+              <span class="pill" data-type="check" onclick="togglePill(this)">Cervical</span>
+              <span class="pill" data-type="check" onclick="togglePill(this)">Torácica</span>
+              <span class="pill" data-type="check" onclick="togglePill(this)">Lombar</span>
+              <span class="pill" data-type="check" onclick="togglePill(this)">Transição T-L</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Hipermobilidade — segmento</span>
+            <div class="pill-group">
+              <span class="pill" data-type="check" onclick="togglePill(this)">Cervical</span>
+              <span class="pill" data-type="check" onclick="togglePill(this)">Torácica</span>
+              <span class="pill" data-type="check" onclick="togglePill(this)">Lombar</span>
+              <span class="pill" data-type="check" onclick="togglePill(this)">Transição T-L</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Cadeia posterior</span>
+            <div class="pill-group">
+              <span class="pill" data-type="check" onclick="togglePill(this)">Encurtamento cadeia posterior</span>
+              <span class="pill" data-type="check" onclick="togglePill(this)">Liberdade cadeia posterior</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Pelve</span>
+            <div class="pill-group" data-radio="pelve-ss">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Neutra</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Retroversão</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Anteversão</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Dor lombar</span>
+            <div class="pill-group" data-radio="dor-ss-tipo">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Sem dor</span>
+              <span class="pill" data-type="radio" data-pain="true" onclick="togglePill(this)">Irradiada</span>
+              <span class="pill" data-type="radio" data-pain="true" onclick="togglePill(this)">Pontual</span>
+              <span class="pill" data-type="radio" data-pain="true" onclick="togglePill(this)">Em queimação e difusa</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Dor torácica</span>
+            <div class="pill-group" data-radio="dor-ss-tor">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Sem dor</span>
+              <span class="pill" data-type="radio" data-pain="true" onclick="togglePill(this)">Irradiada</span>
+              <span class="pill" data-type="radio" data-pain="true" onclick="togglePill(this)">Pontual</span>
+              <span class="pill" data-type="radio" data-pain="true" onclick="togglePill(this)">Em queimação</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Dor cervical</span>
+            <div class="pill-group" data-radio="dor-ss-cerv">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Sem dor</span>
+              <span class="pill" data-type="radio" data-pain="true" onclick="togglePill(this)">Irradiada</span>
+              <span class="pill" data-type="radio" data-pain="true" onclick="togglePill(this)">Pontual</span>
+              <span class="pill" data-type="radio" data-pain="true" onclick="togglePill(this)">Em queimação</span>
+            </div>
+          </div>
+          <textarea class="text-obs" placeholder="Observações livres..."></textarea>
+        </div>
+      </div>
+
+      <!-- Spine Stretch 1 joelho -->
+      <div class="ex-card" id="ex-spine-1j">
+        <div class="ex-header" onclick="toggleEx('ex-spine-1j')">
+          <div style="display:flex;flex-direction:column;gap:0.15rem;">
+            <span class="ex-name">Spine Stretch — variação joelho flexionado</span>
+            <span style="font-size:0.75rem;color:var(--text-muted)">Assimetrias e restrições unilaterais</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;">
+            <span class="ex-equip">Cadillac</span>
+            <span class="ex-chevron">▼</span>
+          </div>
+        </div>
+        <div class="ex-body">
+          <div class="obs-group">
+            <span class="obs-label">Assimetria</span>
+            <div class="pill-group">
+              <span class="pill" data-type="check" onclick="togglePill(this)">Restrição à direita</span>
+              <span class="pill" data-type="check" onclick="togglePill(this)">Restrição à esquerda</span>
+              <span class="pill" data-type="check" onclick="togglePill(this)">Simétrico</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Quadril / lombar</span>
+            <div class="pill-group">
+              <span class="pill" data-type="check" onclick="togglePill(this)">Restrição rotação externa quadril</span>
+              <span class="pill" data-type="check" onclick="togglePill(this)">Encurtamento lombar / QL</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Dor</span>
+            <div class="pill-group">
+              <span class="pill" data-type="check" onclick="togglePill(this)">Sem dor</span>
+              <span class="pill" data-type="check" data-pain="true" onclick="togglePill(this)">Irradiada</span>
+              <span class="pill" data-type="check" data-pain="true" onclick="togglePill(this)">EIPS</span>
+              <span class="pill" data-type="check" data-pain="true" onclick="togglePill(this)">QL</span>
+            </div>
+          </div>
+          <textarea class="text-obs" placeholder="Observações livres..."></textarea>
+        </div>
+      </div>
+
+      <!-- 2. MMII + CONTROLE DE CARGA -->
+      <div class="av-section-header">2 · MMII + controle de carga <span class="equip">Barrel</span></div>
+
+      <!-- Step Down -->
+      <div class="ex-card" id="ex-stepdown">
+        <div class="ex-header" onclick="toggleEx('ex-stepdown')">
+          <div style="display:flex;flex-direction:column;gap:0.15rem;">
+            <span class="ex-name">Step Down</span>
+            <span style="font-size:0.75rem;color:var(--text-muted)">Controle unilateral de MMII</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;">
+            <span class="ex-equip">Barrel</span>
+            <span class="ex-chevron">▼</span>
+          </div>
+        </div>
+        <div class="ex-body">
+          <div class="obs-group">
+            <span class="obs-label">Controle geral</span>
+            <div class="pill-group" data-radio="ctrl-sd">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Bom</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Regular</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Ruim</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Joelho</span>
+            <div class="pill-group" data-radio="joelho-sd">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Neutro</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Valgo</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Varo</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Controle pélvico</span>
+            <div class="pill-group" data-radio="pelve-sd">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Bom</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Regular</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Ruim</span>
+            </div>
+          </div>
+          <textarea class="text-obs" placeholder="Observações livres..."></textarea>
+        </div>
+      </div>
+
+      <!-- Spine Extension -->
+      <div class="ex-card" id="ex-spine-ext">
+        <div class="ex-header" onclick="toggleEx('ex-spine-ext')">
+          <div style="display:flex;flex-direction:column;gap:0.15rem;">
+            <span class="ex-name">Spine Extension</span>
+            <span style="font-size:0.75rem;color:var(--text-muted)">Mobilidade torácica e extensores</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;">
+            <span class="ex-equip">Barrel</span>
+            <span class="ex-chevron">▼</span>
+          </div>
+        </div>
+        <div class="ex-body">
+          <div class="obs-group">
+            <span class="obs-label">Mobilidade</span>
+            <div class="pill-group">
+              <span class="pill" data-type="check" onclick="togglePill(this)">Hipomobilidade torácica</span>
+              <span class="pill" data-type="check" onclick="togglePill(this)">Encurtamento peitoral</span>
+              <span class="pill" data-type="check" onclick="togglePill(this)">Encurtamento grande dorsal</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Dor</span>
+            <div class="pill-group">
+              <span class="pill" data-type="check" onclick="togglePill(this)">Sem dor</span>
+              <span class="pill" data-type="check" data-pain="true" onclick="togglePill(this)">Cervical</span>
+              <span class="pill" data-type="check" data-pain="true" onclick="togglePill(this)">Torácica</span>
+              <span class="pill" data-type="check" data-pain="true" onclick="togglePill(this)">Lombar</span>
+            </div>
+          </div>
+          <textarea class="text-obs" placeholder="Observações livres..."></textarea>
+        </div>
+      </div>
+
+      <!-- 3. MOBILIDADE LATERAL / ESCÁPULA -->
+      <div class="av-section-header">3 · Mobilidade lateral / escápula</div>
+
+      <!-- Mermaid -->
+      <div class="ex-card" id="ex-mermaid">
+        <div class="ex-header" onclick="toggleEx('ex-mermaid')">
+          <div style="display:flex;flex-direction:column;gap:0.15rem;">
+            <span class="ex-name">Mermaid</span>
+            <span style="font-size:0.75rem;color:var(--text-muted)">Flexão lateral e mobilidade escapular</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;">
+            <span class="ex-equip">Reformer</span>
+            <span class="ex-chevron">▼</span>
+          </div>
+        </div>
+        <div class="ex-body">
+          <div class="obs-group">
+            <span class="obs-label">Inclinação lateral</span>
+            <div class="pill-group" data-radio="incl-merm">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Boa</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Regular</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Ruim</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Escápula / trapézio</span>
+            <div class="pill-group">
+              <span class="pill" data-type="check" onclick="togglePill(this)">Restrição escapular</span>
+              <span class="pill" data-type="check" onclick="togglePill(this)">Hiperativação trapézio</span>
+              <span class="pill" data-type="check" onclick="togglePill(this)">Hiperativação elevador da escápula</span>
+            </div>
+          </div>
+          <textarea class="text-obs" placeholder="Observações livres..."></textarea>
+        </div>
+      </div>
+
+      <!-- 4. FORÇA + CONTROLE MMII -->
+      <div class="av-section-header">4 · Força + controle MMII</div>
+
+      <!-- Leg Extension -->
+      <div class="ex-card" id="ex-leg-ext">
+        <div class="ex-header" onclick="toggleEx('ex-leg-ext')">
+          <div style="display:flex;flex-direction:column;gap:0.15rem;">
+            <span class="ex-name">Leg Extension</span>
+            <span style="font-size:0.75rem;color:var(--text-muted)">Controle pélvico e alinhamento de MMII</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;">
+            <span class="ex-equip">Reformer</span>
+            <span class="ex-chevron">▼</span>
+          </div>
+        </div>
+        <div class="ex-body">
+          <div class="obs-group">
+            <span class="obs-label">Pelve</span>
+            <div class="pill-group" data-radio="pelve-le">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Neutra — mantém</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Retroversão</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Anteversão</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Joelho</span>
+            <div class="pill-group" data-radio="joelho-le">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Mantém alinhamento</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Tendência varo</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Tendência valgo</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Pé</span>
+            <div class="pill-group" data-radio="pe-le">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Neutro</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Tendência supinação</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Tendência pronação</span>
+            </div>
+          </div>
+          <textarea class="text-obs" placeholder="Observações livres..."></textarea>
+        </div>
+      </div>
+
+      <!-- Footwork -->
+      <div class="ex-card" id="ex-footwork">
+        <div class="ex-header" onclick="toggleEx('ex-footwork')">
+          <div style="display:flex;flex-direction:column;gap:0.15rem;">
+            <span class="ex-name">Footwork</span>
+            <span style="font-size:0.75rem;color:var(--text-muted)">Alinhamento global — MMII sob carga</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;">
+            <span class="ex-equip">Reformer</span>
+            <span class="ex-chevron">▼</span>
+          </div>
+        </div>
+        <div class="ex-body">
+          <div class="obs-group">
+            <span class="obs-label">Pelve</span>
+            <div class="pill-group" data-radio="pelve-fw">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Neutra — mantém</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Tendência retroversão</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Tendência anteversão</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Tornozelo</span>
+            <div class="pill-group">
+              <span class="pill" data-type="check" onclick="togglePill(this)">Hipomobilidade tornozelo</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Joelho–Pé</span>
+            <div class="pill-group" data-radio="jpe-fw">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Mantém alinhamento</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Tendência varo</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Tendência valgo</span>
+            </div>
+          </div>
+          <textarea class="text-obs" placeholder="Observações livres..."></textarea>
+        </div>
+      </div>
+
+      <!-- 5. MMSS + ESCÁPULA -->
+      <div class="av-section-header">5 · MMSS + escápula</div>
+
+      <!-- Adução MMSS -->
+      <div class="ex-card" id="ex-aducao">
+        <div class="ex-header" onclick="toggleEx('ex-aducao')">
+          <div style="display:flex;flex-direction:column;gap:0.15rem;">
+            <span class="ex-name">Adução de MMSS</span>
+            <span style="font-size:0.75rem;color:var(--text-muted)">Escápula, cervical e integração MMII</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;">
+            <span class="ex-equip">Reformer</span>
+            <span class="ex-chevron">▼</span>
+          </div>
+        </div>
+        <div class="ex-body">
+          <div class="obs-group">
+            <span class="obs-label">Mobilidade escapular</span>
+            <div class="pill-group" data-radio="esc-ad">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Boa</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Regular</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Ruim</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Cervical</span>
+            <div class="pill-group" data-radio="cerv-ad">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Neutra</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Retificação</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Hiperextensão</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Força MMII</span>
+            <div class="pill-group" data-radio="mmii-ad">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Boa</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Regular</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Ruim</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Dor</span>
+            <div class="pill-group">
+              <span class="pill" data-type="check"  onclick="togglePill(this)">Sem dor</span>
+              <span class="pill" data-type="check" data-pain="true" onclick="togglePill(this)">Lombar</span>
+              <span class="pill" data-type="check" data-pain="true" onclick="togglePill(this)">Ombro</span>
+            </div>
+          </div>
+          <textarea class="text-obs" placeholder="Observações livres..."></textarea>
+        </div>
+      </div>
+
+      <!-- 6. CONTROLE UNILATERAL -->
+      <div class="av-section-header">6 · Controle unilateral</div>
+
+      <!-- Pumping One Leg -->
+      <div class="ex-card" id="ex-pump1leg">
+        <div class="ex-header" onclick="toggleEx('ex-pump1leg')">
+          <div style="display:flex;flex-direction:column;gap:0.15rem;">
+            <span class="ex-name">Pumping One Leg Front</span>
+            <span style="font-size:0.75rem;color:var(--text-muted)">Estabilidade pélvica e alinhamento unilateral</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;">
+            <span class="ex-equip">Chair</span>
+            <span class="ex-chevron">▼</span>
+          </div>
+        </div>
+        <div class="ex-body">
+          <div class="obs-group">
+            <span class="obs-label">Pelve</span>
+            <div class="pill-group" data-radio="pelve-p1l">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Boa</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Regular</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Ruim</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Joelho (perna em movimento)</span>
+            <div class="pill-group" data-radio="joelho-p1l">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Mantém alinhamento</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Tendência varo</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Tendência valgo</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Pé do chão</span>
+            <div class="pill-group" data-radio="pe-p1l">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Neutro</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Tendência supinação</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Tendência pronação</span>
+            </div>
+          </div>
+          <textarea class="text-obs" placeholder="Observações livres..."></textarea>
+        </div>
+      </div>
+
+      <!-- Going Up Front -->
+      <div class="ex-card" id="ex-goingup">
+        <div class="ex-header" onclick="toggleEx('ex-goingup')">
+          <div style="display:flex;flex-direction:column;gap:0.15rem;">
+            <span class="ex-name">Going Up Front</span>
+            <span style="font-size:0.75rem;color:var(--text-muted)">Força e controle de tronco unilateral</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;">
+            <span class="ex-equip">Chair</span>
+            <span class="ex-chevron">▼</span>
+          </div>
+        </div>
+        <div class="ex-body">
+          <div class="obs-group">
+            <span class="obs-label">Força</span>
+            <div class="pill-group" data-radio="forca-gu">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Boa</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Regular</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Ruim</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Controle do tronco</span>
+            <div class="pill-group" data-radio="tronco-gu">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Bom</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Regular</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Ruim</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Estratégia de movimento</span>
+            <div class="pill-group">
+              <span class="pill" data-type="check" onclick="togglePill(this)">Impulso excessivo</span>
+              <span class="pill" data-type="check" onclick="togglePill(this)">Movimento controlado</span>
+            </div>
+          </div>
+          <textarea class="text-obs" placeholder="Observações livres..."></textarea>
+        </div>
+      </div>
+
+      <!-- 7. MMSS FORÇA -->
+      <div class="av-section-header">7 · MMSS — força</div>
+
+      <!-- Tríceps -->
+      <div class="ex-card" id="ex-triceps">
+        <div class="ex-header" onclick="toggleEx('ex-triceps')">
+          <div style="display:flex;flex-direction:column;gap:0.15rem;">
+            <span class="ex-name">Tríceps Paralela</span>
+            <span style="font-size:0.75rem;color:var(--text-muted)">Estabilidade escapular e força MMSS</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;">
+            <span class="ex-equip">Chair</span>
+            <span class="ex-chevron">▼</span>
+          </div>
+        </div>
+        <div class="ex-body">
+          <div class="obs-group">
+            <span class="obs-label">Estabilidade escapular</span>
+            <div class="pill-group" data-radio="esc-tri">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Boa</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Regular</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Ruim</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Força (peitoral, tríceps, ombro)</span>
+            <div class="pill-group" data-radio="forca-tri">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Boa</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Regular</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Ruim</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Controle</span>
+            <div class="pill-group" data-radio="ctrl-tri">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Bom</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Regular</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Ruim</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Dor</span>
+            <div class="pill-group">
+              <span class="pill" data-type="check" onclick="togglePill(this)">Sem dor</span>
+              <span class="pill" data-type="check" data-pain="true" onclick="togglePill(this)">Dor no ombro</span>
+            </div>
+          </div>
+          <textarea class="text-obs" placeholder="Observações livres..."></textarea>
+        </div>
+      </div>
+
+      <!-- Bíceps -->
+      <div class="ex-card" id="ex-biceps">
+        <div class="ex-header" onclick="toggleEx('ex-biceps')">
+          <div style="display:flex;flex-direction:column;gap:0.15rem;">
+            <span class="ex-name">Bíceps</span>
+            <span style="font-size:0.75rem;color:var(--text-muted)">Força de flexão e estabilidade compensatória</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;">
+            <span class="ex-equip">Reformer</span>
+            <span class="ex-chevron">▼</span>
+          </div>
+        </div>
+        <div class="ex-body">
+          <div class="obs-group">
+            <span class="obs-label">Compensações</span>
+            <div class="pill-group">
+              <span class="pill" data-type="check" onclick="togglePill(this)">Elevação de ombros</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Manutenção MMII em adução</span>
+            <div class="pill-group" data-radio="mmii-bic">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Boa</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Regular</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Ruim</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Força</span>
+            <div class="pill-group" data-radio="forca-bic">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Boa</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Regular</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Ruim</span>
+            </div>
+          </div>
+          <textarea class="text-obs" placeholder="Observações livres..."></textarea>
+        </div>
+      </div>
+
+      <!-- Abdução Horizontal -->
+      <div class="ex-card" id="ex-abducao-h">
+        <div class="ex-header" onclick="toggleEx('ex-abducao-h')">
+          <div style="display:flex;flex-direction:column;gap:0.15rem;">
+            <span class="ex-name">Abdução Horizontal</span>
+            <span style="font-size:0.75rem;color:var(--text-muted)">Interescapulares e estabilidade de tronco</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;">
+            <span class="ex-equip">Reformer</span>
+            <span class="ex-chevron">▼</span>
+          </div>
+        </div>
+        <div class="ex-body">
+          <div class="obs-group">
+            <span class="obs-label">Compensações</span>
+            <div class="pill-group">
+              <span class="pill" data-type="check" onclick="togglePill(this)">Trapézio hiperativo</span>
+              <span class="pill" data-type="check" onclick="togglePill(this)">Elevador da escápula hiperativo</span>
+              <span class="pill" data-type="check" onclick="togglePill(this)">Punho em extensão</span>
+              <span class="pill" data-type="check" onclick="togglePill(this)">Punho em flexão</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Força interescapulares</span>
+            <div class="pill-group" data-radio="forca-abh">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Boa</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Regular</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Ruim</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Estabilidade do tronco</span>
+            <div class="pill-group" data-radio="tronco-abh">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Boa</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Regular (oscilação anteroposterior do tronco)</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Ruim (tronco em extensão)</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Dor</span>
+            <div class="pill-group">
+              <span class="pill" data-type="check" onclick="togglePill(this)">Sem dor</span>
+              <span class="pill" data-type="check" data-pain="true" onclick="togglePill(this)">Dor no ombro</span>
+            </div>
+          </div>
+          <textarea class="text-obs" placeholder="Observações livres..."></textarea>
+        </div>
+      </div>
+
+      <!-- 8. CORE -->
+      <div class="av-section-header">8 · Core</div>
+
+      <!-- Sit Up -->
+      <div class="ex-card" id="ex-situp">
+        <div class="ex-header" onclick="toggleEx('ex-situp')">
+          <div style="display:flex;flex-direction:column;gap:0.15rem;">
+            <span class="ex-name">Sit Up</span>
+            <span style="font-size:0.75rem;color:var(--text-muted)">Força abdominal e controle de flexão</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;">
+            <span class="ex-equip">Cadillac</span>
+            <span class="ex-chevron">▼</span>
+          </div>
+        </div>
+        <div class="ex-body">
+          <div class="obs-group">
+            <span class="obs-label">Força abdominal</span>
+            <div class="pill-group" data-radio="abd-su">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Boa</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Regular</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Ruim</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Amplitude</span>
+            <div class="pill-group" data-radio="amp-su">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Boa</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Regular</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Ruim</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Uso de molas auxiliares</span>
+            <div class="pill-group" data-radio="mola-su">
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Sim — necessário</span>
+              <span class="pill" data-type="radio" onclick="togglePill(this)">Não necessário</span>
+            </div>
+          </div>
+          <div class="obs-group">
+            <span class="obs-label">Dor</span>
+            <div class="pill-group">
+              <span class="pill" data-type="check" onclick="togglePill(this)">Sem dor</span>
+              <span class="pill" data-type="check" data-pain="true" onclick="togglePill(this)">Ombro</span>
+              <span class="pill" data-type="check" data-pain="true" onclick="togglePill(this)">Lombar</span>
+            </div>
+          </div>
+          <textarea class="text-obs" placeholder="Observações livres..."></textarea>
+        </div>
+      </div>
+
+      <!-- AÇÕES FINAIS -->
+      <div style="margin-top:2rem;background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;">
+        <div style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--sage-dark);margin-bottom:1rem;">Finalizar avaliação</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Aluno avaliado</label>
+            <input type="text" id="av-nome" placeholder="Nome do aluno">
+          </div>
+          <div class="form-group">
+            <label>Data da aula avaliativa</label>
+            <input type="date" id="av-data">
+          </div>
+          <div class="form-group full">
+            <label>Impressões gerais do avaliador</label>
+            <textarea id="av-obs-geral" placeholder="Observações gerais, motivação do aluno, contexto clínico relevante..."></textarea>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:1rem;margin-top:1rem;">
+          <button class="btn btn-secondary" onclick="expandirTodos()">↕ Expandir todos</button>
+          <button class="btn btn-primary" onclick="gerarPlanoAulaAv()">✦ Gerar plano de aulas</button>
+        </div>
+      </div>
+
+      <div class="ai-result" id="resultado-av" style="display:none;">
+        <div id="av-texto" style="display:none;"></div>
+        <div style="display:flex;flex-direction:column;gap:1rem;">
+          <div style="background:var(--white);border-radius:var(--radius-lg);padding:1.25rem;border:1px solid var(--border);">
+            <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--sage-dark);margin-bottom:0.35rem;">Plano de aulas gerado</div>
+            <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem;" id="av-resumo">Análise clínica completa com diagnóstico funcional e progressão de 12 semanas.</div>
+            <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+              <button class="btn btn-primary" onclick="gerarPDF()" id="btn-pdf">⬇ Baixar plano em PDF</button>
+              <button class="btn btn-secondary" onclick="mostrarAulas()" id="btn-aulas">📅 Ver aulas mês a mês</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AULAS MÊS A MÊS -->
+      <div id="painel-aulas" style="display:none;margin-top:1.5rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+          <div style="font-family:'DM Serif Display',serif;font-size:1.4rem;color:var(--sage-dark);">Programa de aulas — 3 meses</div>
+          <button class="btn btn-primary" onclick="gerarPDFAulas()" id="btn-pdf-aulas">⬇ Baixar aulas em PDF</button>
+        </div>
+        <div id="aulas-loading" style="display:none;padding:2rem;text-align:center;">
+          <div class="ai-loading" style="justify-content:center;"><div class="spinner"></div> Elaborando programa de aulas...</div>
+        </div>
+        <div id="aulas-conteudo"></div>
+      </div>
+
+    </div><!-- fim #aula-avaliativa -->
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIGURAÇÃO DA CHAVE DE API ──
+// Cole sua chave da Anthropic na linha abaixo (entre as aspas)
+// API key is managed via getKey() / localStorage
+
+// ── CHAVE DE API ──
+function getKey() {
+  return localStorage.getItem('anthropic_key') || '';
+}
+
+function verificarKey() {
+  const k = getKey();
+  if (k) {
+    window.ANTHROPIC_KEY = k;
+    return true;
+  }
+  return false;
+}
+
+function abrirKeyModal(callback) {
+  window._keyCallback = callback;
+  document.getElementById('key-modal').style.display = 'flex';
+  setTimeout(() => document.getElementById('key-input').focus(), 100);
+}
+
+function fecharKeyModal() {
+  document.getElementById('key-modal').style.display = 'none';
+}
+
+function salvarKey() {
+  const k = document.getElementById('key-input').value.trim();
+  if (!k.startsWith('sk-ant-')) {
+    alert('Chave inválida. Deve começar com sk-ant-');
+    return;
+  }
+  localStorage.setItem('anthropic_key', k);
+  window.ANTHROPIC_KEY = k;
+  fecharKeyModal();
+  showToast('Chave salva ✓');
+  if (window._keyCallback) window._keyCallback();
+}
+
+// ── AVISO FILE:// ──
+if (window.location.protocol === 'file:') {
+  document.addEventListener('DOMContentLoaded', () => {
+    const w = document.getElementById('file-warning');
+    if (w) w.style.display = 'block';
+  });
+}
+
+// ── COLOR PICKERS SYNC ──
+document.addEventListener('DOMContentLoaded', () => {
+  ['cor-primaria','cor-secundaria'].forEach(id => {
+    const picker = document.getElementById(id);
+    const hex = document.getElementById(id + '-hex');
+    if (picker && hex) {
+      picker.addEventListener('input', () => { hex.value = picker.value; });
+    }
+  });
+});
+
+// ── NAVEGAÇÃO ──
+function showPanel(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+// ── ESCALAS ──
+['mob-cerv','mob-tor','mob-lomb','mob-esc','mob-pelv','mob-diss','forca'].forEach(id => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  for (let i = 1; i <= 5; i++) {
+    const btn = document.createElement('button');
+    btn.textContent = i;
+    btn.onclick = () => {
+      el.querySelectorAll('button').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    };
+    el.appendChild(btn);
+  }
+});
+
+// ── CHECKBOXES ──
+document.querySelectorAll('.check-item').forEach(item => {
+  item.addEventListener('click', () => item.classList.toggle('checked'));
+});
+
+// ── COLETAR DADOS ──
+function getChecked(id) {
+  return [...document.querySelectorAll(`#${id} .check-item.checked`)].map(el => el.querySelector('input').value);
+}
+
+function getScale(id) {
+  const sel = document.querySelector(`#${id} button.selected`);
+  return sel ? sel.textContent : 'não avaliado';
+}
+
+function coletarDados() {
+  return {
+    nome: document.getElementById('nome').value || 'Aluno',
+    idade: document.getElementById('idade').value || '—',
+    objetivo: document.getElementById('objetivo').value || '—',
+    historico: document.getElementById('historico').value || 'Nenhum relatado',
+    curvaturas: getChecked('curvaturas').join(', ') || 'não avaliado',
+    ombros: getChecked('ombros').join(', ') || 'não avaliado',
+    cabeca: getChecked('cabeca').join(', ') || 'não avaliado',
+    pelve: document.getElementById('pelve').value || 'não avaliado',
+    joelhos: document.getElementById('joelhos').value || 'não avaliado',
+    pes: document.getElementById('pes').value || 'não avaliado',
+    coxa: getChecked('coxa').join(', ') || 'não avaliado',
+    mobCerv: getScale('mob-cerv'),
+    mobTor: getScale('mob-tor'),
+    mobLomb: getScale('mob-lomb'),
+    mobEsc: getScale('mob-esc'),
+    mobPelv: getScale('mob-pelv'),
+    mobDiss: getScale('mob-diss'),
+    forca: getScale('forca'),
+    regioesDor: getChecked('regioes-dor').join(', ') || 'sem dor',
+    descDor: document.getElementById('desc-dor').value || 'Nenhuma',
+    obs: document.getElementById('obs').value || 'Nenhuma'
+  };
+}
+
+// ── GERAR PLANO ──
+async function gerarPlano() {
+  const d = coletarDados();
+  const resultDiv = document.getElementById('resultado-ia');
+  const textoDiv = document.getElementById('ia-texto');
+
+  resultDiv.classList.add('show');
+  textoDiv.innerHTML = '<div class="ai-loading"><div class="spinner"></div> Analisando avaliação e gerando plano personalizado...</div>';
+
+  const prompt = `Você é um especialista em Pilates clínico e terapêutico com vasta experiência em reabilitação e condicionamento físico. Com base nos dados da avaliação abaixo, gere um plano de aulas de Pilates personalizado e detalhado.
+
+DADOS DA AVALIAÇÃO:
+- Aluno: ${d.nome}, ${d.idade} anos
+- Objetivo: ${d.objetivo}
+- Histórico: ${d.historico}
+
+AVALIAÇÃO POSTURAL:
+- Curvaturas da coluna: ${d.curvaturas}
+- Ombros: ${d.ombros}
+- Cabeça e pescoço: ${d.cabeca}
+- Pelve: ${d.pelve}
+- Joelhos: ${d.joelhos}
+- Pés: ${d.pes}
+- Coxa/rotação quadril: ${d.coxa}
+
+MOBILIDADE (escala 1-5):
+- Cervical: ${d.mobCerv}/5
+- Torácica: ${d.mobTor}/5
+- Lombar: ${d.mobLomb}/5
+- Cintura escapular: ${d.mobEsc}/5
+- Cintura pélvica/quadril: ${d.mobPelv}/5
+- Dissociação pélvica-escapular: ${d.mobDiss}/5
+- Força global: ${d.forca}/5
+
+QUEIXAS E DORES:
+- Regiões: ${d.regioesDor}
+- Descrição: ${d.descDor}
+- Observações: ${d.obs}
+
+Use o dicionário clínico abaixo para interpretar os dados e elaborar um plano fundamentado:
+
+${BASE_CLINICA}
+
+Com base nos dados e no dicionário clínico acima, elabore:
+1. SÍNTESE CLÍNICA: padrões identificados cruzando os dados informados
+2. HIPÓTESES FUNCIONAIS: estruturas encurtadas, fracas/inibidas, síndrome funcional predominante
+3. ABORDAGEM: tratamento/reabilitação, condicionamento ou misto — com justificativa
+4. PRIORIDADES DE TRABALHO: 4-5 itens em ordem de importância
+5. PLANO DE PROGRESSÃO 12 SEMANAS (Fase 1 / Fase 2 / Fase 3)
+6. EXERCÍCIOS A EVITAR OU ADAPTAR: com justificativa clínica
+7. FREQUÊNCIA IDEAL: com justificativa
+
+Seja específico, use terminologia de Pilates clínico, e explicite o raciocínio por trás de cada escolha.`;
+
+  try {
+    const resp = await fetch('/api/claude', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 4000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await resp.json();
+    const texto = data.content?.map(c => c.text || '').join('') || 'Erro ao gerar plano.';
+    textoDiv.textContent = texto;
+
+    salvarAluno(d, texto);
+    showToast(`Plano de ${d.nome} gerado e salvo ✓`);
+  } catch (e) {
+    textoDiv.textContent = 'Erro ao gerar o plano: ' + (e.message || e) + '. Verifique sua conexão e tente novamente.';
+  }
+}
+
+// ── ALUNOS MOCK + SALVOS ──
+let alunos = [
+  { nome: 'Maria Oliveira', idade: 42, objetivo: 'reabilitacao', tag: 'trat', plano: 'Tratamento lombar + reeducação postural' },
+  { nome: 'João Santos', idade: 35, objetivo: 'condicionamento', tag: 'cond', plano: 'Condicionamento físico geral' },
+  { nome: 'Ana Pereira', idade: 58, objetivo: 'qualidade', tag: 'cond', plano: 'Mobilidade e qualidade de vida' },
+  { nome: 'Carlos Lima', idade: 29, objetivo: 'esportivo', tag: 'cond', plano: 'Preparo para corrida' },
+];
+
+function salvarAluno(d, planoIA) {
+  alunos.unshift({ nome: d.nome, idade: d.idade, objetivo: d.objetivo, tag: d.objetivo === 'reabilitacao' ? 'trat' : 'cond', plano: 'Plano gerado por IA' });
+  renderAlunos();
+}
+
+let alunoEditIdx = null;
+
+function renderAlunos() {
+  const grid = document.getElementById('alunos-grid');
+  grid.innerHTML = alunos.map((a, i) => {
+    const initials = a.nome.split(' ').map(w => w[0]).slice(0,2).join('');
+    const aniv = a.aniversario ? `🎂 ${a.aniversario.split('-').reverse().slice(0,2).join('/')}` : '';
+    const doencas = a.doencas ? `<div class="aluno-meta" style="margin-top:0.3rem;color:#c0392b;font-size:0.73rem;">⚕ ${a.doencas}</div>` : '';
+    const tel = a.tel ? `<div class="aluno-meta" style="font-size:0.73rem;">📱 ${a.tel}</div>` : '';
+    return `
+    <div class="aluno-card" onclick="abrirModal(${i})">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.5rem;">
+        <div class="aluno-avatar">${initials}</div>
+        <span style="font-size:0.7rem;color:var(--text-muted)">${aniv}</span>
+      </div>
+      <div class="aluno-name">${a.nome}</div>
+      <div class="aluno-meta">${a.idade ? a.idade + ' anos · ' : ''}${a.objetivo || ''}</div>
+      <div class="aluno-tag ${a.tag === 'trat' ? 'tag-trat' : 'tag-cond'}" style="margin:0.4rem 0;">${a.tag === 'trat' ? 'Tratamento' : 'Condicionamento'}</div>
+      <div class="aluno-meta" style="font-size:0.75rem;margin-bottom:0.3rem;">${a.resumo || a.plano || ''}</div>
+      ${doencas}${tel}
+      <div style="margin-top:0.75rem;text-align:right;">
+        <span style="font-size:0.72rem;color:var(--sage-dark);font-weight:500;">✎ editar</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function abrirModal(idx) {
+  alunoEditIdx = idx;
+  const a = alunos[idx];
+  document.getElementById('m-nome').value = a.nome || '';
+  document.getElementById('m-idade').value = a.idade || '';
+  document.getElementById('m-aniversario').value = a.aniversario || '';
+  document.getElementById('m-objetivo').value = a.objetivo || '';
+  document.getElementById('m-resumo').value = a.resumo || a.plano || '';
+  document.getElementById('m-doencas').value = a.doencas || '';
+  document.getElementById('m-tel').value = a.tel || '';
+  document.getElementById('m-emerg').value = a.emerg || '';
+  document.getElementById('m-emerg-nome').value = a.emergNome || '';
+  document.getElementById('modal-titulo').textContent = a.nome;
+  const modal = document.getElementById('modal-aluno');
+  modal.style.display = 'flex';
+}
+
+function fecharModal() {
+  document.getElementById('modal-aluno').style.display = 'none';
+  alunoEditIdx = null;
+}
+
+function salvarModal() {
+  const dados = {
+    nome: document.getElementById('m-nome').value,
+    idade: document.getElementById('m-idade').value,
+    aniversario: document.getElementById('m-aniversario').value,
+    objetivo: document.getElementById('m-objetivo').value,
+    resumo: document.getElementById('m-resumo').value,
+    doencas: document.getElementById('m-doencas').value,
+    tel: document.getElementById('m-tel').value,
+    emerg: document.getElementById('m-emerg').value,
+    emergNome: document.getElementById('m-emerg-nome').value,
+    tag: document.getElementById('m-objetivo').value === 'reabilitacao' ? 'trat' : 'cond',
+    plano: document.getElementById('m-resumo').value,
+  };
+  if (alunoEditIdx !== null) {
+    alunos[alunoEditIdx] = { ...alunos[alunoEditIdx], ...dados };
+  } else {
+    alunos.unshift(dados);
+  }
+  renderAlunos();
+  fecharModal();
+  showToast('Aluno salvo ✓');
+}
+
+renderAlunos();
+
+// ── PAGAMENTOS MOCK ──
+const pagamentos = [
+  { nome: 'Maria Oliveira', plano: 'Plano tratamento', valor: 'R$ 600', status: 'ok', label: 'Pago', tel: '11991110001' },
+  { nome: 'João Santos', plano: '3x por semana', valor: 'R$ 520', status: 'ok', label: 'Pago', tel: '11991110002' },
+  { nome: 'Ana Pereira', plano: '2x por semana', valor: 'R$ 380', status: 'vence', label: 'Vence amanhã', tel: '11991110003' },
+  { nome: 'Carlos Lima', plano: '3x por semana', valor: 'R$ 520', status: 'atrasado', label: 'Atrasado 5 dias', tel: '11991110004' },
+];
+
+function renderPagamentos() {
+  const list = document.getElementById('pagamentos-list');
+  list.innerHTML = pagamentos.map((p, i) => {
+    let waBtns = '';
+    if (p.tel) {
+      if (p.status === 'vence') {
+        waBtns = `<button onclick="enviarWA(${i},'lembrete')" class="btn btn-secondary" style="padding:0.35rem 0.7rem;font-size:0.75rem;">📱 Lembrete</button>`;
+      } else if (p.status === 'atrasado') {
+        waBtns = `
+          <button onclick="enviarWA(${i},'cobranca1')" class="btn btn-secondary" style="padding:0.35rem 0.7rem;font-size:0.75rem;">📱 2 dias</button>
+          <button onclick="enviarWA(${i},'cobranca2')" class="btn btn-secondary" style="padding:0.35rem 0.7rem;font-size:0.75rem;">📱 5 dias</button>`;
+      }
+    }
+    return `
+    <div class="pag-item" style="flex-wrap:wrap;gap:0.5rem;">
+      <div class="pag-info">
+        <div class="pag-name">${p.nome}</div>
+        <div class="pag-plan">${p.plano}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;">
+        <div class="pag-valor">${p.valor}</div>
+        <div class="pag-status status-${p.status}">${p.label}</div>
+        ${waBtns}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function enviarWA(idx, tipo) {
+  const p = pagamentos[idx];
+  const studio = document.getElementById('wa-studio')?.value || 'nosso estúdio';
+  const pix = document.getElementById('wa-pix')?.value || '';
+  const nome = p.nome.split(' ')[0];
+  let msg = '';
+
+  if (tipo === 'lembrete') {
+    msg = `Olá, ${nome}! 😊 Passando para lembrar, com carinho, que a mensalidade do ${studio} vence amanhã. Qualquer dúvida, estamos à disposição! Até a próxima aula! 🌿`;
+  } else if (tipo === 'cobranca1') {
+    msg = `Olá, ${nome}! Tudo bem? 😊 Notamos que a mensalidade deste mês ainda não foi identificada em nosso sistema. Se houve algum esquecimento, não tem problema! Segue a chave PIX para pagamento ainda hoje, sem multa ou juros: *${pix}* Qualquer dúvida, é só chamar! 💚`;
+  } else if (tipo === 'cobranca2') {
+    msg = `Olá, ${nome}! 😊 Passando novamente em relação à mensalidade de ${studio}, que ainda consta em aberto. Sabemos que o dia a dia é corrido! Se precisar de qualquer apoio, pode contar com a gente. Chave PIX para regularização: *${pix}* Obrigado pela atenção e até breve! 🌿`;
+  }
+
+  const tel = p.tel ? p.tel.replace(/\D/g, '') : '';
+  const url = `https://wa.me/55${tel}?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+}
+
+renderPagamentos();
+
+function registrarPag() {
+  const aluno = document.getElementById('pag-aluno').value;
+  const plano = document.getElementById('pag-plano').value;
+  if (!aluno || !plano) { showToast('Preencha aluno e plano'); return; }
+  const valores = { '2x': 'R$ 380', '3x': 'R$ 520', '5x': 'R$ 720', 'trat': 'R$ 600' };
+  const planoNomes = { '2x': '2x por semana', '3x': '3x por semana', '5x': '5x por semana', 'trat': 'Plano tratamento' };
+  const telPag = document.getElementById('pag-tel')?.value || '';
+  pagamentos.unshift({ nome: aluno, plano: planoNomes[plano], valor: valores[plano], status: 'ok', label: 'Pago', tel: telPag });
+  renderPagamentos();
+  showToast(`Pagamento de ${aluno} registrado ✓`);
+}
+
+// ── INSTAGRAM ──
+let temaAtual = 'dor-coluna';
+
+function selecionarTema(el, tema) {
+  document.querySelectorAll('.tema-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  temaAtual = tema;
+  const wrap = document.getElementById('outros-tema-wrap');
+  if (wrap) wrap.style.display = tema === 'outros' ? 'block' : 'none';
+}
+
+let promptsGerados = {};
+let tabAtiva = 'universal';
+
+async function gerarPost() {
+  if (!verificarKey()) { abrirKeyModal(gerarPost); return; }
+  window.ANTHROPIC_KEY = getKey();
+  const tom = document.getElementById('tom-post').value;
+  const studio = document.getElementById('nome-studio').value || 'nosso estúdio';
+  const endereco = document.getElementById('endereco-studio').value || '';
+  const extra = document.getElementById('extra-insta').value || '';
+  const formato = document.getElementById('img-formato').value;
+  const estilo = document.getElementById('img-estilo').value;
+  const corPrim = document.getElementById('cor-primaria-hex').value || '#3d5c47';
+  const corSec = document.getElementById('cor-secundaria-hex').value || '#c8a882';
+  const imgExtras = document.getElementById('img-extras').value || '';
+
+  const resultDiv = document.getElementById('resultado-insta');
+  const textoDiv = document.getElementById('insta-texto');
+
+  resultDiv.style.display = 'block';
+  textoDiv.innerHTML = '<div class="ai-loading"><div class="spinner"></div> Gerando legenda e prompts de imagem...</div>';
+  ['universal','midjourney','firefly','leonardo'].forEach(k => {
+    const el = document.getElementById('prompt-' + k);
+    if (el) el.textContent = '';
+  });
+
+  const temasMap = {
+    'dor-coluna': 'Como o Pilates ajuda a aliviar e prevenir dores na coluna lombar',
+    'postura': 'Melhora da postura com Pilates e qualidade de vida',
+    'iniciantes': 'Desmistificando o Pilates para quem nunca praticou',
+    'reabilitacao': 'Pilates clínico como ferramenta de reabilitação',
+    'pos-parto': 'Retorno ao exercício no pós-parto com Pilates',
+    'depoimento': 'Depoimento de transformação com Pilates',
+    'outros': document.getElementById('outros-tema-texto')?.value?.trim() || 'tema livre sobre Pilates'
+  };
+  const tonsMap = {
+    'educativo': 'educativo e informativo',
+    'emocional': 'emocional e inspirador',
+    'descontraido': 'descontraído e próximo',
+    'profissional': 'profissional e técnico'
+  };
+  const formatosMap = {
+    '4:5': 'post estático no formato 4:5 (1080×1350px)',
+    'carrossel': 'carrossel de 4-5 slides no formato 4:5',
+    'quadrado': 'post quadrado 1:1 (1080×1080px)',
+    'stories': 'stories vertical 9:16 (1080×1920px)'
+  };
+  const estilosMap = {
+    'fotografico': 'photorealistic photography, professional studio lighting',
+    'ilustracao': 'digital illustration, flat design, modern vector art',
+    'aquarela': 'watercolor painting style, soft brushstrokes, pastel tones',
+    'minimalista': 'minimalist design, clean lines, lots of white space, simple shapes',
+    'manga': 'manga anime art style, Japanese illustration',
+    '3d': '3D render, octane render, soft lighting, high detail'
+  };
+
+  const promptBase = `Você é um especialista em marketing digital para estúdios de Pilates no Brasil e também em criação de prompts para geradores de imagem com IA.
+
+Crie o seguinte para um post de Instagram sobre: "${temasMap[temaAtual]}"
+
+Tom: ${tonsMap[tom]}
+Estúdio: ${studio}
+${endereco ? 'Endereço: ' + endereco : ''}
+${extra ? 'Info extra: ' + extra : ''}
+Formato da imagem: ${formatosMap[formato]}
+Estilo visual: ${estilosMap[estilo]}
+Cor primária da marca: ${corPrim}
+Cor secundária da marca: ${corSec}
+${imgExtras ? 'Elementos visuais: ' + imgExtras : ''}
+
+PARTE 1 — LEGENDA COMPLETA:
+Escreva a legenda pronta para publicar no Instagram com emojis, parágrafos, CTA e 15-20 hashtags relevantes em português. Escreva de forma autêntica para o público brasileiro.
+
+---FIM LEGENDA---
+
+PARTE 2 — PROMPTS DE IMAGEM:
+Gere 4 variações de prompt de imagem, uma para cada ferramenta abaixo. Cada prompt deve descrever a cena ideal para ilustrar este post, com composição visual, iluminação, paleta de cores baseada nas cores da marca (${corPrim} e ${corSec}), estilo (${estilosMap[estilo]}), e dimensões do formato ${formatosMap[formato]}.
+
+PROMPT_UNIVERSAL:
+(prompt em inglês, genérico, funciona em qualquer IA)
+
+PROMPT_MIDJOURNEY:
+(prompt em inglês otimizado para Midjourney com parâmetros como --ar, --style, --v 6)
+
+PROMPT_FIREFLY:
+(prompt em inglês otimizado para Adobe Firefly, focado em linguagem descritiva natural)
+
+PROMPT_LEONARDO:
+(prompt em inglês otimizado para Leonardo AI com estilo e model hints)
+
+Cada prompt deve ter entre 80-150 palavras e ser diretamente copiável.`;
+
+  try {
+    const resp = await fetch('/api/claude', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 4000,
+        messages: [{ role: 'user', content: promptBase }]
+      })
+    });
+
+    const data = await resp.json();
+    const texto = data.content?.map(c => c.text || '').join('') || '';
+
+    // Parse legenda
+    const sep = '---FIM LEGENDA---'; const legendaMatch = texto.includes(sep) ? [texto.split(sep)[0]] : null;
+    const legenda = legendaMatch
+      ? legendaMatch[0].replace(/PARTE\s*1[^\n]*\n/, '').trim()
+      : texto.split('PARTE 2')[0].trim();
+    textoDiv.textContent = legenda;
+
+    // Parse prompts
+    const parseBloco = (tag) => {
+      const re = new RegExp(tag + ':([^]*?)(?=PROMPT_[A-Z]|$)', 's');
+      const m = texto.match(re);
+      return m ? m[1].trim() : '';
+    };
+    promptsGerados = {
+      universal: parseBloco('PROMPT_UNIVERSAL'),
+      midjourney: parseBloco('PROMPT_MIDJOURNEY'),
+      firefly: parseBloco('PROMPT_FIREFLY'),
+      leonardo: parseBloco('PROMPT_LEONARDO'),
+    };
+
+    ['universal','midjourney','firefly','leonardo'].forEach(k => {
+      const el = document.getElementById('prompt-' + k);
+      if (el) el.textContent = promptsGerados[k] || '(não gerado)';
+    });
+
+    mostrarPrompt('universal');
+  } catch (e) {
+    textoDiv.textContent = 'Erro ao conectar com a IA.';
+  }
+}
+
+function mostrarPrompt(tab) {
+  tabAtiva = tab;
+  document.querySelectorAll('.prompt-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll(`#prompt-tabs button`).forEach(b => {
+    if (b.textContent.toLowerCase().includes(tab === 'universal' ? 'universal'
+      : tab === 'midjourney' ? 'midjourney'
+      : tab === 'firefly' ? 'firefly' : 'leonardo')) {
+      b.classList.add('active');
+    }
+  });
+  ['universal','midjourney','firefly','leonardo'].forEach(k => {
+    const el = document.getElementById('prompt-' + k);
+    if (el) el.style.display = k === tab ? 'block' : 'none';
+  });
+}
+
+function copiarPromptAtivo() {
+  const txt = promptsGerados[tabAtiva] || '';
+  if (!txt) { showToast('Gere o conteúdo primeiro'); return; }
+  navigator.clipboard.writeText(txt).then(() => showToast('Prompt copiado ✓'));
+}
+
+function abrirDallE() {
+  const p = promptsGerados['universal'] || '';
+  window.open('https://chatgpt.com/dall-e?q=' + encodeURIComponent(p.slice(0,400)), '_blank');
+}
+function abrirFirefly() {
+  window.open('https://firefly.adobe.com/generate/images', '_blank');
+}
+function abrirLeonardo() {
+  window.open('https://app.leonardo.ai/', '_blank');
+}
+
+function copiarPost() {
+  copiarTexto('insta-texto');
+}
+
+async function gerarPDF() {
+  const btn = document.getElementById('btn-pdf');
+  const textoEl = document.getElementById('av-texto');
+  const texto = textoEl ? textoEl.textContent : '';
+  if (!texto || texto.includes('Analisando')) {
+    showToast('Gere o plano primeiro');
+    return;
+  }
+
+  const nome   = document.getElementById('av-nome')?.value || 'Aluno';
+  const dataAv = document.getElementById('av-data')?.value
+    ? new Date(document.getElementById('av-data').value + 'T00:00:00')
+        .toLocaleDateString('pt-BR') : '';
+  const studio = 'Studio Pilates';
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Gerando PDF...';
+
+  try {
+    await carregarJsPDF();
+    exportarPDF(nome, studio, dataAv, texto);
+  } catch(e) {
+    showToast('Erro ao gerar PDF: ' + (e.message || e));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '⬇ Baixar plano em PDF';
+  }
+}
+
+function carregarJsPDF() {
+  return new Promise((resolve, reject) => {
+    if (window.jspdf) { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+function exportarPDF(aluno, studio, data, texto) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+  const W = 210, H = 297, MAR = 18, CW = W - MAR*2;
+  const VERDE   = [61, 92, 71];
+  const DOURADO = [200, 168, 130];
+  const CREME   = [250, 248, 244];
+  const TEXTO   = [42, 42, 42];
+  const SUAVE   = [122, 117, 112];
+  const VERDE_C = [232, 240, 234];
+
+  // Clean markdown
+  texto = texto
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/\*([^*]+)\*/g, '$1')
+    .replace(/^#{1,4}\s*/gm, '')
+    .replace(/^[\-\•]\s+/gm, '\u2014 ')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/━+/g, '');
+
+  let y = 30, pagina = 1;
+
+  function drawFrame() {
+    doc.setFillColor(...VERDE);
+    doc.rect(0, 0, W, 20, 'F');
+    doc.setFillColor(...DOURADO);
+    doc.rect(0, 19.5, W, 1, 'F');
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(10); doc.setFont('helvetica','bold');
+    doc.text(studio, MAR, 10);
+    doc.setFontSize(7.5); doc.setFont('helvetica','normal');
+    doc.setTextColor(200,220,205);
+    doc.text('Plano de aulas — ' + aluno, MAR, 16);
+    doc.text(data + '   Pág. ' + pagina, W-MAR, 16, {align:'right'});
+    doc.setFillColor(...VERDE_C);
+    doc.rect(0, H-9, W, 9, 'F');
+    doc.setFillColor(...DOURADO);
+    doc.rect(0, H-9, W, 0.5, 'F');
+    doc.setFontSize(6.5); doc.setTextColor(...SUAVE);
+    doc.text('Documento de uso exclusivo do estúdio e do aluno. Não substitui avaliação médica.', W/2, H-3.5, {align:'center'});
+  }
+
+  function newPage() {
+    doc.addPage(); pagina++; y = 28;
+    drawFrame();
+  }
+
+  function checkY(need) { if (y + need > H-13) newPage(); }
+
+  drawFrame();
+
+  // Cover block
+  doc.setFillColor(...VERDE);
+  doc.roundedRect(MAR, y, CW, 24, 4, 4, 'F');
+  doc.setFillColor(...DOURADO);
+  doc.roundedRect(MAR, y+22, CW, 2, 1, 1, 'F');
+  doc.setTextColor(200,220,205); doc.setFontSize(8); doc.setFont('helvetica','normal');
+  doc.text('Plano de aulas personalizado', MAR+7, y+9);
+  doc.setTextColor(255,255,255); doc.setFontSize(15); doc.setFont('helvetica','bold');
+  doc.text(aluno, MAR+7, y+19);
+  y += 32;
+
+  // Section regex
+  const secRe = /^(\d+)\s*[\u00B7\u2022]\s*(.+)/;
+  const faseRe = /^FASE\s+\d/i;
+  const subRe  = /^(MOBILIDADE|REEQUIL|ABORDAGEM|PRIORIDADE|FREQU|RESTRI)/i;
+
+  const linhas = texto.split('\n');
+
+  for (let i = 0; i < linhas.length; i++) {
+    const s = linhas[i].trim();
+    if (!s) { y += 2; continue; }
+
+    // Section header
+    const mSec = secRe.exec(s);
+    if (mSec && s.length < 80) {
+      checkY(14);
+      doc.setFillColor(...VERDE);
+      doc.roundedRect(MAR, y, CW, 10, 2.5, 2.5, 'F');
+      doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont('helvetica','bold');
+      doc.text(s.toUpperCase(), MAR+5, y+7);
+      y += 13;
+      continue;
+    }
+
+    // Fase box
+    if (faseRe.test(s)) {
+      checkY(11);
+      doc.setFillColor(245,237,224);
+      doc.roundedRect(MAR, y, CW, 9, 2, 2, 'F');
+      doc.setFillColor(...DOURADO);
+      doc.rect(MAR, y, 2.5, 9, 'F');
+      doc.setTextColor(122,74,30); doc.setFontSize(9); doc.setFont('helvetica','bold');
+      doc.text(s, MAR+6, y+6.5);
+      y += 12;
+      continue;
+    }
+
+    // Sub-label (MOBILIDADE, REEQUIL, etc.)
+    if (subRe.test(s)) {
+      checkY(9);
+      doc.setFillColor(...VERDE_C);
+      doc.roundedRect(MAR, y, CW, 7, 1.5, 1.5, 'F');
+      doc.setFillColor(...VERDE);
+      doc.rect(MAR, y, 2, 7, 'F');
+      doc.setTextColor(...VERDE); doc.setFontSize(8); doc.setFont('helvetica','bold');
+      const wrapped = doc.splitTextToSize(s, CW-8);
+      doc.text(wrapped[0], MAR+5, y+5);
+      y += 10;
+      continue;
+    }
+
+    // Bullet or numbered item
+    if (/^[—\-•]/.test(s) || /^\d+\./.test(s)) {
+      const txt = s.replace(/^[—\-•]\s*/, '').replace(/^\d+\.\s*/, '');
+      const prefix = /^\d+\./.test(s) ? s.match(/^\d+\./)[0] + ' ' : '— ';
+      checkY(7);
+      const lines = doc.splitTextToSize(prefix + txt, CW-8);
+      doc.setFontSize(8.5); doc.setFont('helvetica','normal'); doc.setTextColor(...TEXTO);
+      // Light bg for numbered
+      if (/^\d+\./.test(s)) {
+        doc.setFillColor(248,250,248);
+        doc.roundedRect(MAR, y, CW, lines.length*5+3, 1.5, 1.5, 'F');
+      }
+      doc.text(lines, MAR+4, y+4.5);
+      y += lines.length*5 + (lines.length > 1 ? 2 : 1);
+      continue;
+    }
+
+    // Label: "Objetivo:", "Foco:", etc.
+    if (/^(Objetivo|Foco|Cuidados|Progressões|Introduzir|Meta|Frequência|Abordagem):/i.test(s)) {
+      checkY(8);
+      const colonIdx = s.indexOf(':');
+      const label = s.slice(0, colonIdx+1);
+      const rest  = s.slice(colonIdx+1).trim();
+      doc.setFontSize(8.5); doc.setFont('helvetica','bold'); doc.setTextColor(...VERDE);
+      doc.text(label, MAR+2, y+5);
+      doc.setFont('helvetica','normal'); doc.setTextColor(...TEXTO);
+      const lw = doc.getTextWidth(label) + 2;
+      const lines = doc.splitTextToSize(rest, CW-lw-4);
+      doc.text(lines, MAR+2+lw, y+5);
+      y += lines.length*5 + 2;
+      continue;
+    }
+
+    // Normal paragraph
+    checkY(7);
+    doc.setFontSize(8.5); doc.setFont('helvetica','normal'); doc.setTextColor(...TEXTO);
+    const lines = doc.splitTextToSize(s, CW-2);
+    doc.text(lines, MAR+2, y+5);
+    y += lines.length*5.5 + 1;
+  }
+
+  const nomeArq = 'plano_' + aluno.replace(/\s+/g,'_').toLowerCase() + '.pdf';
+  doc.save(nomeArq);
+  showToast('PDF baixado ✓');
+}
+
+function copiarTexto(id) {
+  const texto = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(texto).then(() => showToast('Texto copiado ✓'));
+}
+
+// ── AULA AVALIATIVA ──
+function toggleEx(id) {
+  const card = document.getElementById(id);
+  card.classList.toggle('open');
+  atualizarProgresso();
+}
+
+function expandirTodos() {
+  document.querySelectorAll('#aula-avaliativa .ex-card').forEach(c => c.classList.add('open'));
+}
+
+function togglePill(el) {
+  const group = el.closest('.pill-group');
+  const isRadio = el.dataset.type === 'radio';
+  const isPain = el.dataset.pain === 'true';
+  const isSemDor = el.textContent.trim().toLowerCase() === 'sem dor';
+  const useRed = isPain && !isSemDor;
+
+  if (isRadio) {
+    group.querySelectorAll('.pill').forEach(p => {
+      p.classList.remove('selected-radio', 'selected-pain');
+    });
+    el.classList.add(useRed ? 'selected-pain' : 'selected-radio');
+  } else {
+    if (isSemDor) {
+      // "Sem dor" selecionado: limpa todas as dores do grupo
+      group.querySelectorAll('.pill').forEach(p => {
+        p.classList.remove('selected-check', 'selected-pain');
+      });
+      el.classList.add('selected-check');
+    } else if (isPain) {
+      // Dor selecionada: remove "sem dor" do grupo
+      group.querySelectorAll('.pill').forEach(p => {
+        if (p.textContent.trim().toLowerCase() === 'sem dor') {
+          p.classList.remove('selected-check', 'selected-radio');
+        }
+      });
+      el.classList.toggle('selected-pain');
+    } else {
+      el.classList.toggle('selected-check');
+    }
+  }
+  atualizarProgresso();
+}
+
+function atualizarProgresso() {
+  const total = document.querySelectorAll('#aula-avaliativa .ex-card').length;
+  const comAchados = [...document.querySelectorAll('#aula-avaliativa .ex-card')].filter(card => {
+    return card.querySelector('.pill.selected-check, .pill.selected-radio, .pill.selected-pain, .text-obs')
+      && (card.querySelector('.pill.selected-check') || card.querySelector('.pill.selected-radio') || card.querySelector('.pill.selected-pain') || (card.querySelector('.text-obs') && card.querySelector('.text-obs').value.trim()));
+  }).length;
+  const pct = Math.round((comAchados / total) * 100);
+  document.getElementById('av-prog-bar').style.width = pct + '%';
+  document.getElementById('av-prog-label').textContent = comAchados + ' / ' + total + ' exercícios';
+}
+
+function coletarAulaAvaliativa() {
+  const exercicios = [
+    { id: 'ex-spine-stretch', nome: 'Spine Stretch (Cadillac)' },
+    { id: 'ex-spine-1j', nome: 'Spine Stretch 1 joelho flexionado' },
+    { id: 'ex-stepdown', nome: 'Step Down (Barrel)' },
+    { id: 'ex-spine-ext', nome: 'Spine Extension (Barrel)' },
+    { id: 'ex-mermaid', nome: 'Mermaid (Reformer)' },
+    { id: 'ex-leg-ext', nome: 'Leg Extension (Reformer)' },
+    { id: 'ex-footwork', nome: 'Footwork (Reformer)' },
+    { id: 'ex-aducao', nome: 'Adução MMSS (Reformer)' },
+    { id: 'ex-pump1leg', nome: 'Pumping One Leg (Chair)' },
+    { id: 'ex-goingup', nome: 'Going Up Front (Chair)' },
+    { id: 'ex-triceps', nome: 'Tríceps (Chair)' },
+    { id: 'ex-biceps', nome: 'Bíceps (Reformer)' },
+    { id: 'ex-abducao-h', nome: 'Abdução Horizontal (Reformer)' },
+    { id: 'ex-situp', nome: 'Sit Up (Cadillac)' },
+  ];
+
+  return exercicios.map(ex => {
+    const card = document.getElementById(ex.id);
+    if (!card) return null;
+    const achados = [...card.querySelectorAll('.pill.selected-check, .pill.selected-radio, .pill.selected-pain')]
+      .map(p => p.textContent.trim());
+    const obs = card.querySelector('.text-obs')?.value?.trim() || '';
+    if (!achados.length && !obs) return null;
+    return `• ${ex.nome}:\n  Achados: ${achados.join(', ') || '—'}\n  ${obs ? 'Obs: ' + obs : ''}`;
+  }).filter(Boolean).join('\n\n');
+}
+
+// ── AULAS MÊS A MÊS ──
+let _aulasGeradas = null;
+
+async function mostrarAulas() {
+  if (!window._planoGerado) { showToast('Gere o plano primeiro'); return; }
+  if (!verificarKey()) { abrirKeyModal(mostrarAulas); return; }
+  window.ANTHROPIC_KEY = getKey();
+  
+  const painel = document.getElementById('painel-aulas');
+  const loading = document.getElementById('aulas-loading');
+  const conteudo = document.getElementById('aulas-conteudo');
+  
+  painel.style.display = 'block';
+  painel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  
+  if (_aulasGeradas) { renderAulas(_aulasGeradas); return; }
+  
+  loading.style.display = 'block';
+  conteudo.innerHTML = '';
+  
+  const { nome, texto } = window._planoGerado;
+  const achados = document.getElementById('av-texto')?.textContent || texto;
+
+  const prompt = `${BASE_CLINICA}
+
+Você é um instrutor sênior de Pilates clínico. Com base no plano abaixo, crie um programa de aulas detalhado para 3 meses.
+
+PLANO CLÍNICO:
+${achados}
+
+Responda APENAS com um JSON válido, sem markdown, sem explicação, neste formato exato:
+{
+  "meses": [
+    {
+      "mes": 1,
+      "titulo": "Base e Consciência Corporal",
+      "frequencia": 2,
+      "foco": "Breve descrição do foco terapêutico deste mês (1-2 frases)",
+      "aulas": [
+        {
+          "numero": 1,
+          "aquecimento": ["Exercício 1 — aparelho/variação", "Exercício 2", "Exercício 3", "Exercício 4"],
+          "mmss": ["Exercício 1 — aparelho/variação", "Exercício 2", "Exercício 3", "Exercício 4"],
+          "mmii": ["Exercício 1 — aparelho/variação", "Exercício 2", "Exercício 3", "Exercício 4"],
+          "tronco": ["Exercício 1 — aparelho/variação", "Exercício 2", "Exercício 3", "Exercício 4"]
+        },
+        { "numero": 2, "aquecimento": [], "mmss": [], "mmii": [], "tronco": [] },
+        { "numero": 3, "aquecimento": [], "mmss": [], "mmii": [], "tronco": [] }
+      ]
+    },
+    { "mes": 2, "titulo": "Ativação e Fortalecimento", "frequencia": 2, "foco": "...", "aulas": [...] },
+    { "mes": 3, "titulo": "Integração e Performance", "frequencia": 3, "foco": "...", "aulas": [...] }
+  ]
+}
+
+Cada array deve ter exatamente 4 exercícios. Use nomes reais de exercícios de Pilates com o aparelho indicado (Reformer, Cadillac, Chair, Barrel, Mat). Os exercícios devem ser coerentes com o diagnóstico clínico do aluno.`;
+
+  try {
+    const resp = await fetch('/api/claude', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 4000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await resp.json();
+    const raw = data.content?.map(c => c.text || '').join('') || '';
+    
+    // Parse JSON
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('Resposta inválida da IA');
+    _aulasGeradas = JSON.parse(jsonMatch[0]);
+    
+    loading.style.display = 'none';
+    renderAulas(_aulasGeradas);
+    
+    // Enable PDF button
+    document.getElementById('btn-pdf-aulas').disabled = false;
+  } catch(e) {
+    loading.style.display = 'none';
+    conteudo.innerHTML = '<div style="color:#c0392b;padding:1rem;">Erro ao gerar aulas: ' + (e.message||e) + '</div>';
+  }
+}
+
+function renderAulas(dados) {
+  const conteudo = document.getElementById('aulas-conteudo');
+  const fases = [
+    { key: 'aquecimento', label: '🌅 Aquecimento', cls: 'fase-aquecimento' },
+    { key: 'mmss',        label: '💪 Membros Superiores', cls: 'fase-mmss' },
+    { key: 'mmii',        label: '🦵 Membros Inferiores', cls: 'fase-mmii' },
+    { key: 'tronco',      label: '🎯 Tronco / Core', cls: 'fase-tronco' },
+  ];
+
+  conteudo.innerHTML = dados.meses.map((mes, mi) => {
+    const tabsHTML = mes.aulas.map((a, ai) =>
+      `<button class="aula-tab ${ai===0?'active':''}" onclick="trocarAula(${mi},${ai})">Aula ${a.numero}</button>`
+    ).join('');
+
+    const aulasHTML = mes.aulas.map((aula, ai) => {
+      const fasesHTML = fases.map(f => {
+        const exs = (aula[f.key]||[]).map(ex =>
+          `<div class="ex-item"><div class="ex-dot"></div><span>${ex}</span></div>`
+        ).join('');
+        return `<div class="fase-aula">
+          <div class="fase-aula-header ${f.cls}">${f.label}</div>
+          <div class="ex-lista">${exs}</div>
+        </div>`;
+      }).join('');
+      return `<div class="aula-panel ${ai===0?'active':''}" id="mes${mi}-aula${ai}">${fasesHTML}</div>`;
+    }).join('');
+
+    return `
+    <div>
+      <div class="mes-header">
+        <span>Mês ${mes.mes}</span>
+        <span style="font-family:'DM Sans',sans-serif;font-size:0.95rem;font-weight:400;opacity:0.9;">${mes.titulo}</span>
+        <span class="mes-badge">${mes.frequencia}x / semana</span>
+      </div>
+      <div class="mes-body">
+        <div class="freq-badge">🎯 ${mes.foco}</div>
+        <div class="aula-tabs" id="tabs-mes${mi}">${tabsHTML}</div>
+        ${aulasHTML}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function trocarAula(mesIdx, aulaIdx) {
+  // Update tabs
+  const tabs = document.querySelectorAll(`#tabs-mes${mesIdx} .aula-tab`);
+  tabs.forEach((t,i) => t.classList.toggle('active', i===aulaIdx));
+  // Update panels
+  const panels = document.querySelectorAll(`[id^="mes${mesIdx}-aula"]`);
+  panels.forEach((p,i) => p.classList.toggle('active', i===aulaIdx));
+}
+
+// ── PDF AULAS ──
+async function gerarPDFAulas() {
+  if (!_aulasGeradas) { showToast('Visualize as aulas primeiro'); return; }
+  const btn = document.getElementById('btn-pdf-aulas');
+  btn.disabled = true; btn.textContent = '⏳ Gerando PDF...';
+  
+  const nome = window._planoGerado?.nome || 'Aluno';
+  const studio = 'Studio Pilates';
+  const data = window._planoGerado?.data || '';
+  
+  try {
+    await carregarJsPDF();
+    exportarPDFAulas(nome, studio, data, _aulasGeradas);
+  } catch(e) {
+    showToast('Erro: ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = '⬇ Baixar aulas em PDF';
+  }
+}
+
+function exportarPDFAulas(aluno, studio, data, dados) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const W = 210, H = 297, MAR = 18, CW = W - MAR*2;
+
+  const VERDE   = [61, 92, 71];
+  const DOURADO = [200, 168, 130];
+  const BRANCO  = [255,255,255];
+  const TEXTO   = [42,42,42];
+  const SUAVE   = [122,117,112];
+
+  // Fase colors
+  const FASE_COLORS = {
+    aquecimento: { bg: [232,244,240], text: [45,106,79],  label: 'AQUECIMENTO' },
+    mmss:        { bg: [232,234,246], text: [57,73,171],  label: 'MEMBROS SUPERIORES' },
+    mmii:        { bg: [255,243,224], text: [230,81,0],   label: 'MEMBROS INFERIORES' },
+    tronco:      { bg: [252,228,236], text: [198,40,40],  label: 'TRONCO / CORE' },
+  };
+
+  let y = 0, pagina = 1;
+
+  function drawPageFrame() {
+    // Header
+    doc.setFillColor(...VERDE);
+    doc.rect(0, 0, W, 20, 'F');
+    doc.setFillColor(...DOURADO);
+    doc.rect(0, 19.5, W, 1, 'F');
+    doc.setTextColor(...BRANCO);
+    doc.setFontSize(10); doc.setFont('helvetica','bold');
+    doc.text(studio, MAR, 10);
+    doc.setFontSize(7.5); doc.setFont('helvetica','normal');
+    doc.setTextColor(200,220,205);
+    doc.text('Programa de aulas — ' + aluno, MAR, 16);
+    doc.text(data + '   ·   Pág. ' + pagina, W-MAR, 16, {align:'right'});
+    // Footer
+    doc.setFillColor(232,240,234);
+    doc.rect(0, H-9, W, 9, 'F');
+    doc.setFillColor(...DOURADO);
+    doc.rect(0, H-9, W, 0.5, 'F');
+    doc.setFontSize(6.5); doc.setTextColor(...SUAVE);
+    doc.text('Documento de uso exclusivo do estúdio e do aluno.', W/2, H-3, {align:'center'});
+  }
+
+  function newPage() {
+    doc.addPage(); pagina++;
+    drawPageFrame();
+    y = 28;
+  }
+
+  function checkY(need) { if (y + need > H-14) newPage(); }
+
+  drawPageFrame();
+  y = 28;
+
+  // Cover block
+  doc.setFillColor(...VERDE);
+  doc.roundedRect(MAR, y, CW, 22, 4, 4, 'F');
+  doc.setFillColor(...DOURADO);
+  doc.roundedRect(MAR, y+20, CW, 2, 1, 1, 'F');
+  doc.setTextColor(200,220,205); doc.setFontSize(8); doc.setFont('helvetica','normal');
+  doc.text('Programa de aulas — 3 meses', MAR+7, y+9);
+  doc.setTextColor(...BRANCO); doc.setFontSize(14); doc.setFont('helvetica','bold');
+  doc.text(aluno, MAR+7, y+18);
+  y += 30;
+
+  const fasesOrder = ['aquecimento','mmss','mmii','tronco'];
+
+  dados.meses.forEach((mes) => {
+    checkY(20);
+    // Mes header
+    doc.setFillColor(...VERDE);
+    doc.roundedRect(MAR, y, CW, 12, 3, 3, 'F');
+    doc.setTextColor(...BRANCO); doc.setFontSize(10); doc.setFont('helvetica','bold');
+    doc.text('MÊS ' + mes.mes + '  ·  ' + mes.titulo.toUpperCase(), MAR+6, y+8);
+    // Freq badge
+    const freqTxt = mes.frequencia + 'x por semana';
+    const freqW = doc.getTextWidth(freqTxt) + 6;
+    doc.setFillColor(...DOURADO);
+    doc.roundedRect(W-MAR-freqW-2, y+3, freqW+2, 6, 2, 2, 'F');
+    doc.setFontSize(7); doc.setTextColor(...BRANCO);
+    doc.text(freqTxt, W-MAR-freqW/2-1, y+7.5, {align:'center'});
+    y += 15;
+
+    // Foco
+    checkY(10);
+    doc.setFillColor(245,237,224);
+    doc.roundedRect(MAR, y, CW, 9, 2, 2, 'F');
+    doc.setFillColor(...DOURADO);
+    doc.rect(MAR, y, 2.5, 9, 'F');
+    doc.setFontSize(8); doc.setTextColor(122,74,30); doc.setFont('helvetica','normal');
+    const focoLines = doc.splitTextToSize('🎯 ' + mes.foco, CW-10);
+    doc.text(focoLines[0], MAR+6, y+6);
+    y += 13;
+
+    mes.aulas.forEach((aula) => {
+      checkY(14);
+      // Aula subheader
+      doc.setFillColor(232,240,234);
+      doc.roundedRect(MAR, y, CW, 8, 2, 2, 'F');
+      doc.setFillColor(61,92,71);
+      doc.rect(MAR, y, 2.5, 8, 'F');
+      doc.setFontSize(8.5); doc.setTextColor(...VERDE); doc.setFont('helvetica','bold');
+      doc.text('AULA ' + aula.numero, MAR+6, y+5.5);
+      y += 11;
+
+      fasesOrder.forEach(fk => {
+        const fc = FASE_COLORS[fk];
+        const exs = aula[fk] || [];
+        const blockH = 7 + exs.length * 5.5 + 3;
+        checkY(blockH);
+
+        // Fase header
+        doc.setFillColor(...fc.bg);
+        doc.roundedRect(MAR+3, y, CW-3, 6, 2, 2, 'F');
+        doc.setFontSize(6.5); doc.setFont('helvetica','bold');
+        doc.setTextColor(...fc.text);
+        doc.text(fc.label, MAR+7, y+4.5);
+        y += 8;
+
+        // Exercises
+        exs.forEach(ex => {
+          checkY(6);
+          doc.setFillColor(...fc.bg);
+          doc.circle(MAR+7, y+2.5, 1, 'F');
+          doc.setFontSize(8); doc.setFont('helvetica','normal');
+          doc.setTextColor(...TEXTO);
+          const lines = doc.splitTextToSize(ex, CW-14);
+          doc.text(lines, MAR+10, y+3.5);
+          y += lines.length * 5;
+        });
+        y += 3;
+      });
+      y += 4;
+    });
+    y += 6;
+  });
+
+  const nomeArq = 'aulas_' + aluno.replace(/\s+/g,'_').toLowerCase() + '.pdf';
+  doc.save(nomeArq);
+  showToast('PDF das aulas baixado ✓');
+}
+
+// ── FORMATAÇÃO DO PLANO ──
+function formatarPlano(texto) {
+  const linhas = texto.split('\n');
+  let html = '';
+  for (let linha of linhas) {
+    const trimmed = linha.trim();
+    if (!trimmed) { html += '<div style="height:0.5rem"></div>'; continue; }
+
+    // Cabeçalhos de seção (linha com ━)
+    if (trimmed.startsWith('━')) continue;
+    if (/^\d+\s*[·•]\s/.test(trimmed) && trimmed.length < 60) {
+      html += `<div style="
+        margin: 1.4rem 0 0.6rem;
+        padding: 0.5rem 0.9rem;
+        background: var(--sage-dark);
+        color: white;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.82rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      ">${trimmed}</div>`;
+      continue;
+    }
+
+    // Sub-blocos em caixa alta (ex: MOBILIDADE E ALONGAMENTO —)
+    if (/^[A-ZÁÉÍÓÚÀÂÊÔÃÕÇ ]{8,}[—-]/.test(trimmed) || /^[A-ZÁÉÍÓÚÀÂÊÔÃÕÇ ]{8,}$/.test(trimmed)) {
+      html += `<div style="
+        margin: 0.9rem 0 0.3rem;
+        font-weight: 600;
+        font-size: 0.8rem;
+        color: var(--sage-dark);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        border-left: 3px solid var(--warm);
+        padding-left: 0.6rem;
+      ">${trimmed}</div>`;
+      continue;
+    }
+
+    // FASE X ·
+    if (/^FASE\s+\d/i.test(trimmed)) {
+      html += `<div style="
+        margin: 1rem 0 0.35rem;
+        padding: 0.45rem 0.85rem;
+        background: var(--warm-light);
+        border-left: 3px solid var(--warm);
+        border-radius: 0 8px 8px 0;
+        font-weight: 600;
+        font-size: 0.82rem;
+        color: #7a4a1e;
+      ">${trimmed}</div>`;
+      continue;
+    }
+
+    // Linhas com rótulo: "Objetivo:", "Foco:", etc.
+    if (/^(Objetivo|Foco|Cuidados|Progressões|Introduzir|Meta|Frequência|Justificativa|Recomendação):/.test(trimmed)) {
+      const [label, ...rest] = trimmed.split(':');
+      html += `<div style="margin:0.25rem 0 0.1rem;font-size:0.87rem;">
+        <span style="font-weight:600;color:var(--sage-dark)">${label}:</span>
+        <span>${rest.join(':')}</span>
+      </div>`;
+      continue;
+    }
+
+    // Itens numerados 1. 2. etc
+    if (/^\d+\.\s/.test(trimmed)) {
+      html += `<div style="
+        margin: 0.3rem 0;
+        padding: 0.45rem 0.75rem;
+        background: var(--sage-light);
+        border-radius: 6px;
+        font-size: 0.87rem;
+        line-height: 1.55;
+      ">${trimmed}</div>`;
+      continue;
+    }
+
+    // Linhas com bullet —
+    if (trimmed.startsWith('—') || trimmed.startsWith('-') || trimmed.startsWith('•')) {
+      html += `<div style="
+        margin: 0.2rem 0 0.2rem 0.75rem;
+        font-size: 0.87rem;
+        line-height: 1.55;
+        color: var(--text);
+      ">${trimmed}</div>`;
+      continue;
+    }
+
+    // Parágrafo normal
+    html += `<p style="font-size:0.88rem;line-height:1.65;margin:0.2rem 0;">${trimmed}</p>`;
+  }
+  return html;
+}
+
+// ── BASE DE CONHECIMENTO CLÍNICO ──
+const BASE_CLINICA = `
+DICIONÁRIO CLÍNICO DE INTERPRETAÇÃO DOS ACHADOS — AULA AVALIATIVA DE PILATES
+(Use este conhecimento para interpretar cada achado e raciocinar sobre prescrição)
+
+═══════════════════════════════════════════════════
+1. SPINE STRETCH (Cadillac / Mat / Wall Unit)
+═══════════════════════════════════════════════════
+HIPOMOBILIDADE: segmentos retificados com pouca mobilidade naquele nível → hipermobilidade compensatória nas regiões adjacentes (funcionam como dobradiça) → desgaste precoce de disco e facetas articulares → geralmente são os pontos dolorosos.
+HIPERMOBILIDADE em pontos isolados: hipersolicitação daquele segmento → desgaste precoce.
+ENCURTAMENTO CADEIA POSTERIOR: músculos posteriores encurtados limitam a flexão anterior do tronco.
+PELVE NEUTRA: bom posicionamento, aluno sentado sobre tuberosidades isquiáticas.
+PELVE EM RETROVERSÃO: encurtamento de isquiotibiais e/ou pelvitrocanterianos (principalmente piriforme) → pelve fixa em retroversão → retificação lombar → dificulta flexão e construção da curva "C" do Pilates.
+PELVE EM ANTEVERSÃO: encurtamento de lombares (quadrado lombar, iliolombar, iliocostal) e iliopsoas → pelve travada em anteversão.
+DOR IRRADIADA: sugestão de dor neural — compressão periférica de nervo ou em raízes na emergência radicular.
+DOR PONTUAL: sugestão de lesão discal — dor lancinante, em pontada, facada.
+DOR EM QUEIMAÇÃO/DIFUSA: fadiga muscular + lesão articular facetária + instabilidades por fraqueza de estabilizadores profundos (multífidos).
+LOCALIZAÇÃO DOR ATRÁS DA COXA/JOELHO: diferenciar dor neural (choque) de desconforto de alongamento dos isquiotibiais.
+LOCALIZAÇÃO CERVICAL/TORÁCICA/LOMBAR/SACRO: chamar atenção do instrutor para o segmento.
+DOR SOBRE EIPS: sugestão de lesão do ligamento iliolombar.
+
+═══════════════════════════════════════════════════
+2. SPINE STRETCH 1 JOELHO FLEXIONADO (Cadillac)
+═══════════════════════════════════════════════════
+RESTRIÇÃO À DIREITA: menor amplitude em direção ao pé direito → maior restrição cadeia posterior MMII direito + encurtamento do quadrado lombar e paravertebrais lombares contralaterais (esquerdo).
+RESTRIÇÃO À ESQUERDA: menor amplitude em direção ao pé esquerdo → maior restrição cadeia posterior MMII esquerdo + encurtamento do quadrado lombar e paravertebrais lombares contralaterais (direito).
+RESTRIÇÃO ROTAÇÃO EXTERNA DO QUADRIL: joelho do lado flexionado distante do estofado → encurtamento de adutores do quadril (rotadores internos) + possível falta de mobilidade do quadril na retroversão pélvica. Explicação: rotação externa do quadril associa-se a anteversão pélvica; rotação interna associa-se a retroversão. Dificuldade na rotação interna → pelve possivelmente "travada" em anteversão.
+ENCURTAMENTO LOMBAR/QL: dificuldade na flexão do tronco com inclinação lateral → encurtamento de paravertebrais lombares e quadrado lombar.
+DOR IRRADIADA: lesão central ou periférica do nervo isquiático (face posterior coxa/joelho) OU nervo femoral (face anterointerna da coxa).
+DOR EIPS: forte indicativo de lesão nos ligamentos iliocostais por rotação da pelve.
+DOR QL: dor em queimação sobre o QL → fadiga muscular por espasmo protetor (hérnia de disco com pinçamento radicular), lesão facetária, ou instabilidade lombar crônica.
+
+═══════════════════════════════════════════════════
+3. SPINE EXTENSION (Barrel / Spine Corrector)
+═══════════════════════════════════════════════════
+HIPOMOBILIDADE TORÁCICA: restrição em extensão → coluna torácica retificada ou hipercifótica.
+ENCURTAMENTO PEITORAL/DORSAL: evidenciado por baixa amplitude de flexão dos ombros.
+DOR CERVICAL: dor no compartimento posterior → lesão articular cervical. Dor na parte anterior → restrição por encurtamento muscular do grupo anterior do pescoço.
+DOR TORÁCICA: sugestão de lesão articular.
+DOR LOMBAR: aliar aos dados do Spine Stretch quanto à localização e característica.
+DOR NO OMBRO: face anterior ou anterossuperior → tendinites (supraespinhoso, cabeça longa do bíceps braquial) e/ou bursites → diminuição do espaço subacromial + fraqueza dos depressores e adutores escapulares (principalmente serrátil anterior e fibras inferiores do trapézio).
+
+═══════════════════════════════════════════════════
+4. MERMAID (Reformer / Cadillac / Chair / Wall Unit)
+═══════════════════════════════════════════════════
+INCLINAÇÃO BOA: boa mobilidade no plano frontal, paravertebrais contralaterais livres.
+INCLINAÇÃO REGULAR: redução do arco por restrições articulares e/ou musculares na coluna.
+INCLINAÇÃO RUIM (especialmente com dor): restrições articulares/musculares severas + possível dor no ombro de ambos os braços.
+RESTRIÇÃO ESCAPULAR: observar se o braço livre flui com harmonia pela rotação superior da escápula. Dor no ombro ou restrição → diminuição espaço subacromial + fraqueza de depressores/adutores escapulares. Braço em abdução saindo do plano frontal → encurtamento do grande dorsal.
+DOR COMPARTIMENTO LATERAL DO OMBRO: tendinite do supraespinhoso.
+DOR COMPARTIMENTO ANTERIOR DO OMBRO: tendinite do supraespinhoso + bursite subacromial.
+DOR INTERESCAPULAR: fraqueza/distensão dos mm. interescapulares, romboides e fibras médias do trapézio.
+HIPERATIVAÇÃO TRAPÉZIO/ELEVADOR DA ESCÁPULA: ombros sobem em direção às orelhas durante a abdução → dificulta dinâmica escapular e ritmo escapuloumeral → comum nas tendinites do ombro.
+
+═══════════════════════════════════════════════════
+5. STEP DOWN (Barrel / Cadillac)
+═══════════════════════════════════════════════════
+CONTROLE BOM: movimento harmônico em ritmo e fluidez.
+CONTROLE REGULAR: irregularidade de ritmo e amplitude.
+CONTROLE RUIM: pouca amplitude → restrição por encurtamento de quadríceps e flexores do quadril.
+JOELHO NEUTRO: alinhamento com pé → bom controle muscular, equilíbrio entre adutores e abdutores.
+JOELHO VALGO: fraqueza de glúteo médio + tensão da banda iliotibial.
+JOELHO VARO: encurtamento dos rotadores externos do quadril (pelvitrocanterianos, principalmente piriforme e glúteos).
+PELVE OSCILAÇÃO LATERAL: fraqueza de glúteo médio + tensão da banda iliotibial.
+PELVE EM ANTEVERSÃO MANTIDA: encurtamento de flexores do quadril (iliopsoas, reto femoral) e paravertebrais lombares.
+PELVE EM RETROVERSÃO MANTIDA: encurtamento de isquiotibiais e piriforme.
+
+═══════════════════════════════════════════════════
+6. FOOTWORK (Reformer / Cadillac / Wall Unit)
+═══════════════════════════════════════════════════
+PELVE NEUTRA MANTIDA: bom controle do quadril e estabilidade com sacro totalmente apoiado.
+TENDÊNCIA RETROVERSÃO: encurtamento de músculos posteriores do quadril (isquiotibiais e piriforme).
+TENDÊNCIA ANTEVERSÃO: encurtamento de paravertebrais lombares e iliopsoas.
+HIPOMOBILIDADE TORNOZELO: encurtamento do tríceps sural (restrição em dorsiflexão) OU restrição articular/ligamentar (restrição em ambos os movimentos ou apenas um).
+JOELHO-PÉ MANTÉM ALINHAMENTO: bom controle, equilíbrio entre adutores e abdutores.
+JOELHO-PÉ TENDÊNCIA VARO: encurtamento dos rotadores externos (piriforme e glúteos).
+JOELHO-PÉ TENDÊNCIA VALGO: fraqueza de glúteo médio + tensão da banda iliotibial.
+
+═══════════════════════════════════════════════════
+7. LEG EXTENSION (Reformer)
+═══════════════════════════════════════════════════
+PELVE MANTÉM NEUTRA: bom controle pélvico (decúbito dorsal, sacro totalmente apoiado).
+PELVE RETROVERSÃO: encurtamento de pelvitrocanterianos (principalmente piriforme) na volta do movimento (flexão de quadril e joelho).
+PELVE ANTEVERSÃO: encurtamento de iliopsoas, quadrado lombar e paravertebrais lombares na partida do movimento (extensão de quadril e joelho).
+JOELHO MANTÉM: bom controle, alinhamento com quadril e pés.
+JOELHO VARO: tendência de rotação externa do quadril → encurtamento de rotadores externos (pelvitrocanterianos, piriforme).
+JOELHO VALGO DINÂMICO: tendência de rotação interna do quadril → encurtamento de rotadores internos, adutores e tensor da fáscia lata → pelve frequentemente travada em anteversão.
+PÉ NEUTRO: boa descarga de peso homogênea → bom controle do conjunto pelve-joelho-pé.
+PÉ SUPINADO: arco longitudinal medial aumentado OU descarga na borda lateral → rotação externa do quadril + encurtamento de rotadores externos → pelve frequentemente travada em retroversão.
+PÉ PRONADO: desabamento do arco longitudinal medial → rotação interna do quadril, valgo dinâmico → encurtamento de rotadores internos, adutores e tensor da fáscia lata → pelve frequentemente travada em anteversão.
+
+═══════════════════════════════════════════════════
+8. PUMPING ONE LEG (Chair)
+═══════════════════════════════════════════════════
+PELVE OSCILAÇÃO LATERAL: fraqueza de glúteo médio + tensão da banda iliotibial.
+PELVE BOM CONTROLE: estabilidade pélvica + bom controle de abdutores do quadril.
+JOELHO ESTÁVEL: estabilidade dos músculos da coxa e quadril.
+JOELHO VARO: encurtamento de rotadores externos (piriforme e glúteos).
+JOELHO VALGO: fraqueza de glúteo médio + tensão da banda iliotibial + encurtamento de adutores.
+PÉ NEUTRO: estabilidade da pelve + bom controle de abdutores + boa descarga de peso no pé de apoio.
+PÉ SUPINAÇÃO: encurtamento de rotadores externos (piriforme e glúteos) → descarga na borda lateral do pé → estresse na face lateral do joelho.
+PÉ PRONAÇÃO: fraqueza de glúteo médio + tensão da banda iliotibial + encurtamento de adutores + provável redução do arco plantar + fraqueza de intrínsecos dos pés → indica série forte de Footwork no tratamento.
+
+═══════════════════════════════════════════════════
+9. GOING UP FRONT (Chair)
+═══════════════════════════════════════════════════
+FORÇA BOA: bom controle de extensores do quadril e joelhos. Movimento limpo, sem necessidade de apoio das mãos.
+FORÇA REGULAR: menos controle e força dos extensores.
+FORÇA RUIM: fraqueza dos extensores do quadril e joelhos.
+CONTROLE TRONCO BOM: equilíbrio entre musculatura anterior e posterior (paravertebrais e abdominais).
+CONTROLE TRONCO REGULAR: pouco equilíbrio entre anterior e posterior.
+CONTROLE TRONCO RUIM: fraqueza severa de abdominais e paravertebrais → necessita apoio das mãos nas barras para se impulsionar.
+IMPULSO EXCESSIVO NA PARTIDA: movimento equivocado → indicar pré-Pilates com transferência de peso sobre os pés (ex: afundo).
+
+═══════════════════════════════════════════════════
+10. TRÍCEPS (Chair)
+═══════════════════════════════════════════════════
+ESTABILIDADE ESCAPULAR BOA: fibras inferiores do trapézio e serrátil anterior acionados → escápula em adução moderada e depressão.
+ESTABILIDADE ESCAPULAR REGULAR: oscilações da escápula durante o movimento, com elevação do ângulo inferior.
+ESTABILIDADE ESCAPULAR RUIM: descolamento da borda medial da escápula do gradil costal + elevação do ângulo inferior.
+FORÇA BOA: movimento limpo, harmônico, sem projeção dos ombros para frente.
+FORÇA REGULAR: bom movimento, mas precisa de auxílio das molas.
+FORÇA RUIM: mesmo com molas o movimento é ruim, sem harmonia → trava cotovelos em hiperextensão para descanso.
+DOR LATERAL DO OMBRO: tendinite do supraespinhoso.
+DOR ANTERIOR DO OMBRO: bursite + tendinite do supra e/ou cabeça longa do bíceps.
+DOR INTERESCAPULAR: fraqueza dos músculos interescapulares.
+
+═══════════════════════════════════════════════════
+11. ADUÇÃO DE MMSS (Reformer — decúbito dorsal)
+═══════════════════════════════════════════════════
+MOBILIDADE ESCAPULAR BOA: adução completa dos MMSS, braços rentes ao estofado, ombros sem deslocar do apoio.
+MOBILIDADE ESCAPULAR REGULAR: adução parcial, ombros tendendo a elevar em direção às orelhas ou anteriorizar.
+MOBILIDADE ESCAPULAR RUIM: adução parcial por fraqueza dos adutores (peitoral, grande dorsal) ou encurtamento do grande dorsal/supraespinhoso → quanto maior a elevação dos ombros, maior a hiperatividade do trapézio → mau ritmo escapuloumeral.
+CERVICAL NEUTRA: lordose fisiológica mantida, espaço da nuca preservado.
+CERVICAL RETIFICADA: tensão de encurtamento dos flexores do pescoço (face anterior), principalmente esternocleidomastoideo.
+CERVICAL HIPEREXTENDIDA: tensão de encurtamento dos extensores do pescoço → elevação do queixo.
+FORÇA MMII BOA: boa capacidade de manter os MMII suspensos (flexores do quadril + abdominais).
+FORÇA MMII REGULAR: MMII começam a abaixar → força reduzida nos flexores do quadril e abdominais.
+FORÇA MMII RUIM: grande dificuldade para manter posição → fraqueza acentuada de flexores do quadril e abdominais.
+DOR LOMBAR: pode indicar fraqueza abdominal.
+DOR OMBRO: tendinite do supraespinhoso, cabeça longa do bíceps e/ou bursite subacromial.
+
+═══════════════════════════════════════════════════
+12. BÍCEPS (Reformer)
+═══════════════════════════════════════════════════
+ELEVAÇÃO DOS OMBROS: falta de estabilidade na cintura escapular → fraqueza do serrátil anterior (depressor da escápula) → ação exagerada do trapézio (fibras superiores).
+MMII EM ADUÇÃO BOA: sem tensão em banda iliotibial nem pelvitrocanterianos.
+MMII EM ADUÇÃO REGULAR: joelhos levemente descolados → alguma tensão em banda iliotibial e pelvitrocanterianos.
+MMII EM ADUÇÃO RUIM: joelhos muito descolados → grande tensão em banda iliotibial e rotadores externos → tremor nas coxas pelos adutores em oposição. Essa tensão dos rotadores externos tende a deixar a pelve em retroversão.
+FORÇA BOA: arco total da flexão dos cotovelos com cotovelos na altura dos ombros.
+FORÇA REGULAR: arco parcial com cotovelos abaixo da altura dos ombros.
+FORÇA RUIM: arco parcial com punho tendendo à extensão → carga excessiva para o aluno.
+
+═══════════════════════════════════════════════════
+13. ABDUÇÃO HORIZONTAL (Reformer)
+═══════════════════════════════════════════════════
+TRAPÉZIO/ELEVADOR HIPERATIVOS: hiperatividade compensatória.
+FORÇA INTERESCAPULARES BOA: aproximação controlada das bordas mediais das escápulas durante a abdução.
+FORÇA INTERESCAPULARES REGULAR: descolamento parcial das bordas mediais.
+FORÇA INTERESCAPULARES RUIM: grande descolamento das bordas mediais + elevação dos ombros para compensar fraqueza dos abdutores horizontais e retratores escapulares.
+ESTABILIDADE TRONCO BOA: equilíbrio entre abdominais e paravertebrais.
+ESTABILIDADE TRONCO REGULAR: oscilações durante a série → incoordenação entre anterior e posterior + provável fraqueza abdominal.
+ESTABILIDADE TRONCO RUIM: fraqueza de abdominais e paravertebrais.
+DOR LATERAL DO OMBRO: tendinite do supraespinhoso.
+DOR ANTERIOR DO OMBRO: bursite + tendinite do supra e/ou cabeça longa do bíceps.
+DOR INTERESCAPULAR: fraqueza dos músculos interescapulares.
+
+═══════════════════════════════════════════════════
+14. SIT UP (Cadillac)
+═══════════════════════════════════════════════════
+FORÇA ABDOMINAL BOA: completa o arco com facilidade, ombros longe das orelhas (escápulas em depressão).
+FORÇA ABDOMINAL REGULAR: arco parcial ou total com alta solicitação dos flexores dos ombros → elevação dos ombros.
+FORÇA ABDOMINAL RUIM: arco reduzido, apenas ombros levantam → fraqueza abdominal + possível restrição de mobilidade lombar que impede ação eficaz dos abdominais.
+AMPLITUDE BOA: arco total até sentar.
+AMPLITUDE REGULAR: arco parcial da flexão do tronco.
+AMPLITUDE RUIM: apenas ombros e início da torácica descolam → grande esforço dos MMSS com elevação de ombros.
+MOLAS NECESSÁRIAS: menor força abdominal → molas ajudam a elevar o tronco.
+SEM MOLAS: boa força abdominal + boa mobilidade lombar.
+DOR OMBRO: durante o sit up pode indicar tendinite.
+DOR LOMBAR: pode indicar fraqueza abdominal + instabilidade lombar.
+
+═══════════════════════════════════════════════════
+PADRÕES CLÍNICOS A RECONHECER
+═══════════════════════════════════════════════════
+SÍNDROME CRUZADA INFERIOR: anteversão pélvica + joelho valgo + pé pronado + fraqueza de glúteos + encurtamento de iliopsoas e paravertebrais.
+SÍNDROME CRUZADA SUPERIOR: hipercifose torácica + projeção anterior da cabeça + ombros anteriorizados + fraqueza de interescapulares + encurtamento de peitorais.
+PADRÃO PIRIFORME/PELVE RETROVERSA: joelho varo + pé supinado + pelve em retroversão + retificação lombar + encurtamento de isquiotibiais e pelvitrocanterianos.
+INSTABILIDADE LOMBAR CRÔNICA: dor difusa/queimação lombar + fraqueza de multífidos + fraqueza abdominal + hipermobilidade segmentar.
+SÍNDROME DO OMBRO: hiperatividade de trapézio + fraqueza de interescapulares + diminuição do espaço subacromial + mau ritmo escapuloumeral.
+`;
+
+async function gerarPlanoAulaAv() {
+  if (!verificarKey()) { abrirKeyModal(gerarPlanoAulaAv); return; }
+  window.ANTHROPIC_KEY = getKey();
+  const nome = document.getElementById('av-nome').value || 'Aluno';
+  const dataAv = document.getElementById('av-data').value || 'não informada';
+  const obsGeral = document.getElementById('av-obs-geral').value || '';
+  const achados = coletarAulaAvaliativa();
+
+  const resultDiv = document.getElementById('resultado-av');
+  const textoDiv = document.getElementById('av-texto');
+  resultDiv.classList.add('show');
+  textoDiv.innerHTML = '<div class="ai-loading"><div class="spinner"></div> Analisando achados e elaborando plano clínico...</div>';
+
+  const prompt = `${BASE_CLINICA}
+
+TAREFA: ELABORAR PLANO DE PILATES PERSONALIZADO
+
+Você é um instrutor sênior de Pilates clínico. Use o dicionário clínico acima para interpretar os achados e gerar um plano claro, direto e visualmente organizado. NÃO mencione os nomes dos exercícios da aula avaliativa onde os achados foram observados — foque nos padrões e disfunções encontrados.
+
+ALUNO: ${nome}
+DATA: ${dataAv}
+${obsGeral ? 'OBSERVAÇÕES DO INSTRUTOR: ' + obsGeral : ''}
+
+ACHADOS DA AULA AVALIATIVA:
+${achados || 'Nenhum achado registrado.'}
+
+Estruture o plano exatamente assim, usando os separadores abaixo:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1 · SÍNTESE CLÍNICA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Descreva em parágrafo corrido os principais padrões identificados — posturais, de mobilidade, força, controle motor e dor. Cruze os achados para identificar padrões consistentes sem citar os exercícios onde foram observados.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2 · DIAGNÓSTICO FUNCIONAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Organize em dois blocos obrigatórios:
+
+MOBILIDADE E ALONGAMENTO — liste as articulações/regiões com menor mobilidade identificadas, e para cada uma indique os grupos musculares prioritários para trabalho de alongamento e mobilização. Esta é a base do início do tratamento.
+
+REEQUILÍBRIO MUSCULAR DINÂMICO — liste os grupos musculares fracos ou inibidos que precisam ser fortalecidos para restaurar o equilíbrio muscular, com ênfase nos antagonistas dos músculos encurtados identificados acima.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3 · ABORDAGEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Defina: Tratamento / Condicionamento / Misto. Justifique em 2-3 linhas.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4 · PRIORIDADES DE TRABALHO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Liste 4-5 prioridades numeradas, em ordem de importância, com justificativa breve em cada uma.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5 · PLANO DE PROGRESSÃO — 12 SEMANAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FASE 1 · Semanas 1–4 · Base e consciência corporal
+Objetivo: ...
+Foco: ...
+Cuidados: ...
+
+FASE 2 · Semanas 5–8 · Ativação e fortalecimento
+Objetivo: ...
+Progressões: ...
+Introduzir: ...
+
+FASE 3 · Semanas 9–12 · Integração e performance
+Objetivo: ...
+Exercícios de integração: ...
+Meta esperada: ...
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6 · RESTRIÇÕES E ADAPTAÇÕES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Liste os movimentos ou padrões a evitar ou adaptar, com justificativa clínica. Não cite nomes de exercícios específicos — descreva o padrão de movimento a restringir.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7 · FREQUÊNCIA IDEAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Recomendação com justificativa em 2-3 linhas.`;
+
+  try {
+    const resp = await fetch('/api/claude', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 4000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const dataResp = await resp.json();
+    const texto = dataResp.content?.map(c => c.text || '').join('') || 'Erro ao gerar plano.';
+    textoDiv.innerHTML = formatarPlano(texto);
+    // Store for PDF and aulas
+    window._planoGerado = { nome, studio: 'Studio Pilates', data: dataAv, texto };
+    
+    // Show action panel (hide loading)
+    resultDiv.style.display = 'block';
+    const resumoEl = document.getElementById('av-resumo');
+    if (resumoEl) resumoEl.textContent = 'Diagnóstico funcional completo com programa de 12 semanas para ' + nome + '.';
+    
+    showToast('Plano de ' + nome + ' gerado ✓');
+  } catch (e) {
+    resultDiv.style.display = 'block';
+    const chave = getKey();
+    const msg = !chave ? 'Chave de API não encontrada. Clique em Gerar plano novamente para configurar.' 
+                       : 'Erro: ' + (e.message || e) + ' | Chave: ...'+chave.slice(-6);
+    textoDiv.textContent = msg;
+    textoDiv.style.display = 'block';
+  }
+}
+
+// ── UTILITÁRIOS ──
+function limparForm() {
+  document.querySelectorAll('input, select, textarea').forEach(el => el.value = '');
+  document.querySelectorAll('.check-item.checked').forEach(el => el.classList.remove('checked'));
+  document.querySelectorAll('.scale-options button.selected').forEach(el => el.classList.remove('selected'));
+  document.getElementById('resultado-ia').classList.remove('show');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
